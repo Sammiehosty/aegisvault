@@ -6,8 +6,9 @@ export async function apiRequest<T = Record<string, unknown>>(
   path: string,
   options: { method?: "GET" | "POST"; token?: string; body?: unknown } = {},
 ): Promise<T> {
+  const method = options.method ?? "GET";
   const response = await fetch(`${API_BASE}${path}`, {
-    method: options.method ?? "GET",
+    method,
     cache: "no-store",
     headers: {
       Accept: "application/json",
@@ -19,7 +20,10 @@ export async function apiRequest<T = Record<string, unknown>>(
 
   const result = (await response.json().catch(() => ({}))) as T & { ok?: boolean; error?: string };
   if (!response.ok || result.ok === false) {
-    throw new Error(result.error || `API request failed (${response.status}).`);
+    const message = result.error || "The API returned an unexpected response.";
+    // Include safe request metadata so a production error identifies the
+    // exact endpoint and HTTP status without exposing credentials or tokens.
+    throw new Error(`${message} (HTTP ${response.status}; ${method} ${path})`);
   }
   return result;
 }
