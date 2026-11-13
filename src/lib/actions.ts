@@ -11,6 +11,24 @@ function failure(error: unknown): ActionResult {
   return { ok: false, error: error instanceof Error ? error.message : "The API request failed. Please try again." };
 }
 
+export async function establishSessionAction(token: string): Promise<ActionResult> {
+  try {
+    if (!/^[a-f0-9]{64}$/i.test(token)) {
+      return { ok: false, error: "The API returned an invalid session. Please try again." };
+    }
+    // Verify the API-issued token before placing it in the HttpOnly cookie.
+    const result = await apiRequest<{ ok: true; user: { role: "user" | "admin" } }>(
+      "/auth/me",
+      { token },
+    );
+    await setSessionToken(token);
+    revalidatePath("/dashboard");
+    return { ok: true, redirect: result.user.role === "admin" ? "/admin" : "/dashboard" };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
 export async function registerAction(input: { fullName: string; email: string; password: string }): Promise<ActionResult> {
   try {
     const result = await apiRequest<AuthResponse>("/auth/register", { method: "POST", body: input });
