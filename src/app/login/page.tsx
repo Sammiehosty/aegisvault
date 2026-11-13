@@ -11,7 +11,7 @@ export default async function LoginPage() {
 
   return (
     <AuthShell
-      headline="Welcome back. Stay scam-aware."
+      headline="Welcome back."
       sub="Sign in to review your wallet protection requests and scam-safety resources."
     >
       <LoginForm />

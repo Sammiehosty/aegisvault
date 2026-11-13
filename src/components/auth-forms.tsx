@@ -86,7 +86,7 @@ export function LoginForm() {
       <p className="pt-2 text-center text-[13px] text-fog">
         New to AegisVault?{" "}
         <Link href="/register" className="font-semibold text-aegis transition hover:text-[#3cf5b4]">
-          Create your scam-safety account
+          Create your secured account
         </Link>
       </p>
     </form>
@@ -152,7 +152,7 @@ export function RegisterForm() {
           required
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          placeholder="Amara Okafor"
+          placeholder="John Smith"
           autoComplete="name"
         />
       </Field>
@@ -174,10 +174,7 @@ export function RegisterForm() {
         <ArrowRight className="h-4 w-4" />
       </Button>
 
-      <p className="rounded-xl border border-aegis/20 bg-aegis/[0.06] px-4 py-3 text-xs leading-relaxed text-mist">
-        AegisVault is non-custodial. We will <span className="font-semibold text-white">never</span> ask
-        for your 12/24-word recovery phrase, private keys, or signatures that move funds.
-      </p>
+      
 
       <p className="pt-1 text-center text-[13px] text-fog">
         Already have an account?{" "}
