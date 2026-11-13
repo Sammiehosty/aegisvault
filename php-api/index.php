@@ -64,11 +64,8 @@ function camelRows(array $items): array {
     }, $items);
 }
 
-// The API is deliberately server-to-server: Next.js holds this secret and
-// forwards the user's HttpOnly session token. Do not enable public CORS.
-$provided = $_SERVER['HTTP_X_AEGIS_SERVER_KEY'] ?? '';
-$expected = (string)($config['server_secret'] ?? '');
-if (strlen($expected) < 32 || !hash_equals($expected, $provided)) respond(403, ['ok'=>false,'error'=>'Forbidden']);
+// No shared API key is required. User-specific routes remain protected by
+// expiring bearer session tokens; administrative routes also verify the user's role.
 
 try {
     $dsn = sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $config['db_host'], (int)$config['db_port'], $config['db_name']);
