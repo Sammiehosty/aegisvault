@@ -446,7 +446,7 @@ try {
             if (!$row || !password_verify($current,$row['password_hash'])) respond(422,['ok'=>false,'error'=>'Current password is incorrect.']);
             if (strlen($new)<10) respond(422,['ok'=>false,'error'=>'New password must be at least 10 characters.']);
             $q=$pdo->prepare('UPDATE users SET password_hash=? WHERE id=?'); $q->execute([password_hash($new,PASSWORD_DEFAULT),$user['id']]);
-            $q=$pdo->prepare('DELETE FROM sessions WHERE user_id=? AND id<>?'); $q->execute([$user['id'], $_SESSION['session_id'] ?? '']);
+            $q=$pdo->prepare('DELETE FROM sessions WHERE user_id=?'); $q->execute([$user['id']]);
             respond(200,['ok'=>true]);
         }
         respond(404,['ok'=>false,'error'=>'Admin endpoint not found.']);
