@@ -1,0 +1,169 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { loginAction, registerAction } from "@/lib/actions";
+import { Button, Field, Input } from "@/components/ui";
+
+function PasswordField({ label, value, onChange, placeholder }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <Field label={label}>
+      <div className="relative">
+        <Input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={label === "Password" ? "current-password" : "new-password"}
+          className="pr-11"
+        />
+        <button
+          type="button"
+          onClick={() => setShow((s) => !s)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-fog/60 transition hover:text-white"
+          aria-label={show ? "Hide password" : "Show password"}
+        >
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+    </Field>
+  );
+}
+
+export function LoginForm() {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        start(async () => {
+          try {
+            const res = await loginAction({ email, password });
+            if (!res.ok) {
+              toast.error(res.error);
+              return;
+            }
+            toast.success("Welcome back. Session secured.");
+            router.push(res.redirect ?? "/dashboard");
+            router.refresh();
+          } catch {
+            toast.error("Network hiccup reaching the server — please retry.");
+          }
+        });
+      }}
+    >
+      <Field label="Email address">
+        <Input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          autoComplete="email"
+        />
+      </Field>
+      <PasswordField label="Password" value={password} onChange={setPassword} placeholder="••••••••" />
+
+      <Button type="submit" loading={pending} className="w-full py-3">
+        Sign in securely
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+
+      <p className="pt-2 text-center text-[13px] text-fog">
+        New to AegisVault?{" "}
+        <Link href="/register" className="font-semibold text-aegis transition hover:text-[#3cf5b4]">
+          Create a protected account
+        </Link>
+      </p>
+    </form>
+  );
+}
+
+export function RegisterForm() {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (password !== confirm) {
+          toast.error("Passwords do not match.");
+          return;
+        }
+        start(async () => {
+          try {
+            const res = await registerAction({ fullName, email, password });
+            if (!res.ok) {
+              toast.error(res.error);
+              return;
+            }
+            toast.success("Account created. Your security journey begins.");
+            router.push(res.redirect ?? "/dashboard");
+            router.refresh();
+          } catch {
+            toast.error("Network hiccup reaching the server — please retry.");
+          }
+        });
+      }}
+    >
+      <Field label="Full name">
+        <Input
+          required
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          placeholder="Amara Okafor"
+          autoComplete="name"
+        />
+      </Field>
+      <Field label="Email address">
+        <Input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          autoComplete="email"
+        />
+      </Field>
+      <PasswordField label="Password" value={password} onChange={setPassword} placeholder="Minimum 8 characters" />
+      <PasswordField label="Confirm password" value={confirm} onChange={setConfirm} placeholder="Repeat your password" />
+
+      <Button type="submit" loading={pending} className="w-full py-3">
+        Create secure account
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+
+      <p className="rounded-xl border border-aegis/20 bg-aegis/[0.06] px-4 py-3 text-xs leading-relaxed text-mist">
+        AegisVault is non-custodial. We will <span className="font-semibold text-white">never</span> ask
+        for your 12/24-word recovery phrase, private keys, or signatures that move funds.
+      </p>
+
+      <p className="pt-1 text-center text-[13px] text-fog">
+        Already protected?{" "}
+        <Link href="/login" className="font-semibold text-aegis transition hover:text-[#3cf5b4]">
+          Sign in
+        </Link>
+      </p>
+    </form>
+  );
+}

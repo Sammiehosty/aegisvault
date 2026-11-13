@@ -1,0 +1,270 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BadgeCheck,
+  EyeOff,
+  Globe,
+  ShieldAlert,
+  ShieldCheck,
+  Wallet,
+} from "lucide-react";
+import { Modal, Button, Field, Input, cx } from "@/components/ui";
+import { WALLET_TYPES, detectChain, getWalletType, shortAddress, type WalletType } from "@/lib/wallets";
+import { submitWalletRequest } from "@/lib/actions";
+
+const stepAnim = {
+  initial: { opacity: 0, x: 28 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -28 },
+  transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
+};
+
+export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const router = useRouter();
+  const [step, setStep] = useState(0);
+  const [wallet, setWallet] = useState<WalletType | null>(null);
+  const [address, setAddress] = useState("");
+  const [label, setLabel] = useState("");
+  const [pending, start] = useTransition();
+
+  const chain = detectChain(address.trim());
+
+  function reset() {
+    setStep(0);
+    setWallet(null);
+    setAddress("");
+    setLabel("");
+  }
+
+  function submit() {
+    if (!wallet) return;
+    start(async () => {
+      try {
+        const res = await submitWalletRequest({ walletType: wallet.id, address, label });
+        if (!res.ok) {
+          toast.error(res.error);
+          return;
+        }
+        toast.success("Protection request submitted — pending compliance review.");
+        onClose();
+        reset();
+        router.refresh();
+      } catch {
+        toast.error("Network hiccup reaching the server — please retry.");
+      }
+    });
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={() => {
+        onClose();
+        setTimeout(reset, 250);
+      }}
+      title="Connect a wallet"
+      wide={step === 0}
+    >
+      {/* never-ask banner */}
+      <div className="mb-6 flex items-start gap-3 rounded-2xl border border-aegis/25 bg-aegis/[0.07] px-4 py-3.5">
+        <EyeOff className="mt-0.5 h-4.5 w-4.5 shrink-0 text-aegis" />
+        <p className="text-xs leading-relaxed text-mist">
+          <span className="font-bold text-aegis">We will never ask for your recovery phrase.</span>{" "}
+          Connecting AegisVault protection only ever requires your{" "}
+          <span className="font-semibold text-white">public wallet address</span> — the same string you
+          share to receive payments. Anyone who asks for 12/24 words is attempting theft.
+        </p>
+      </div>
+
+      {/* progress */}
+      <div className="mb-6 flex items-center gap-2">
+        {["Wallet", "Address", "Review"].map((s, i) => (
+          <div key={s} className="flex flex-1 items-center gap-2">
+            <span
+              className={cx(
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-colors",
+                i <= step
+                  ? "border-aegis/50 bg-aegis/15 text-aegis"
+                  : "border-line-strong bg-white/[0.03] text-fog",
+              )}
+            >
+              {i + 1}
+            </span>
+            <span className={cx("text-[11px] font-semibold", i <= step ? "text-white" : "text-fog/60")}>
+              {s}
+            </span>
+            <div className={cx("h-px flex-1", i < 2 ? (i < step ? "bg-aegis/50" : "bg-line-strong") : "hidden")} />
+          </div>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {step === 0 && (
+          <motion.div key="s0" {...stepAnim}>
+            <p className="mb-4 text-[13px] text-fog">
+              Select the wallet you want to place under AegisVault protection:
+            </p>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {WALLET_TYPES.map((w) => (
+                <button
+                  key={w.id}
+                  onClick={() => {
+                    setWallet(w);
+                    setStep(1);
+                  }}
+                  className={cx(
+                    "group flex flex-col items-start gap-2.5 rounded-2xl border border-line bg-white/[0.02] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-aegis/40 hover:bg-aegis/[0.05]",
+                    wallet?.id === w.id && "border-aegis/50 bg-aegis/[0.07]",
+                  )}
+                >
+                  <span
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white/[0.04]"
+                    style={{ color: w.accent }}
+                  >
+                    <Wallet className="h-4.5 w-4.5" />
+                  </span>
+                  <span>
+                    <span className="block text-[13px] font-semibold text-white">{w.name}</span>
+                    <span className="block text-[10.5px] text-fog">{w.chain}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {step === 1 && wallet && (
+          <motion.div key="s1" {...stepAnim} className="space-y-4">
+            <button
+              onClick={() => setStep(0)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-fog transition hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> {wallet.name} selected — change
+            </button>
+
+            <Field
+              label="Public wallet address"
+              hint="The receiving address only — starts with 0x… (EVM), bc1…/1…/3… (Bitcoin) or a Solana base58 string."
+            >
+              <Input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+                className="mono text-[13px]"
+                autoFocus
+              />
+            </Field>
+
+            {address.trim().length > 8 && (
+              <div
+                className={cx(
+                  "flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs",
+                  chain
+                    ? "border-aegis/30 bg-aegis/[0.06] text-aegis"
+                    : "border-danger/30 bg-danger/[0.06] text-danger",
+                )}
+              >
+                {chain ? (
+                  <>
+                    <BadgeCheck className="h-4 w-4" /> Valid {chain} address detected
+                  </>
+                ) : (
+                  <>
+                    <ShieldAlert className="h-4 w-4" /> Not a recognised public address format
+                  </>
+                )}
+              </div>
+            )}
+
+            <Field label="Label (optional)" hint="A friendly name, e.g. “Trading wallet” or “Cold storage”.">
+              <Input
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="Main wallet"
+                maxLength={60}
+              />
+            </Field>
+
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-warn/25 bg-amber-warn/[0.06] px-4 py-3">
+              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-warn" />
+              <p className="text-xs leading-relaxed text-mist">
+                If you were about to paste 12 or 24 words — <span className="font-semibold text-white">stop</span>.
+                Those words control your funds. AegisVault never needs them, and our input fields are
+                intentionally designed for public addresses only.
+              </p>
+            </div>
+
+            <Button
+              className="w-full py-3"
+              disabled={!chain}
+              onClick={() => setStep(2)}
+            >
+              Continue to review
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </motion.div>
+        )}
+
+        {step === 2 && wallet && (
+          <motion.div key="s2" {...stepAnim} className="space-y-4">
+            <div className="rounded-2xl border border-line bg-white/[0.02] p-5">
+              <p className="mb-4 font-display text-xs font-bold uppercase tracking-[0.16em] text-fog">
+                Request summary
+              </p>
+              <dl className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-fog">Wallet</dt>
+                  <dd className="font-semibold text-white">{wallet.name}</dd>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-fog">Network</dt>
+                  <dd className="inline-flex items-center gap-1.5 font-semibold text-white">
+                    <Globe className="h-3.5 w-3.5 text-aegis" />
+                    {chain}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-fog">Address</dt>
+                  <dd className="mono text-[13px] font-semibold text-aegis">{shortAddress(address.trim())}</dd>
+                </div>
+                {label && (
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-fog">Label</dt>
+                    <dd className="font-semibold text-white">{label}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-2xl border border-line bg-white/[0.02] px-4 py-3.5">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-aegis" />
+              <p className="text-xs leading-relaxed text-fog">
+                After submission your request enters{" "}
+                <span className="font-semibold text-amber-warn">Pending review</span>. A compliance
+                analyst screens the address against fraud datasets and approves it — your status then
+                flips to <span className="font-semibold text-aegis">Connected</span> and the wallet is
+                covered by AegisVault protection.
+              </p>
+            </div>
+
+            <div className="flex gap-2.5">
+              <Button variant="outline" onClick={() => setStep(1)} className="flex-1 py-3">
+                <ArrowLeft className="h-4 w-4" /> Back
+              </Button>
+              <Button onClick={submit} loading={pending} className="flex-[2] py-3">
+                Submit for review
+                <ShieldCheck className="h-4 w-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Modal>
+  );
+}
