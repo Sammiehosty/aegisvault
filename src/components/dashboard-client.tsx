@@ -222,7 +222,7 @@ export default function DashboardClient({
 
             {/* activity */}
             <Card className="p-6">
-              <p className="mb-4 flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-fog">
+              <p id="activity-history" className="scroll-mt-24 mb-4 flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-fog">
                 <History className="h-4 w-4 text-aegis" /> Activity
               </p>
               <div className="slim-scroll max-h-[320px] space-y-3 overflow-y-auto pr-1">
@@ -263,7 +263,7 @@ export default function DashboardClient({
               <Card className="p-6 sm:p-7">
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight text-white">
+                    <h2 id="wallet-protection" className="scroll-mt-24 flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight text-white">
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-aegis/25 bg-aegis/[0.08] text-aegis">
                         <Wallet className="h-4.5 w-4.5" />
                       </span>
@@ -346,7 +346,7 @@ export default function DashboardClient({
               <Card className="p-6 sm:p-7">
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight text-white">
+                    <h2 id="backup-verification" className="scroll-mt-24 flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight text-white">
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-glow/25 bg-glow/[0.08] text-glow">
                         <HardDrive className="h-4.5 w-4.5" />
                       </span>
