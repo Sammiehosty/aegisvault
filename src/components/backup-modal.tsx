@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
-import { ArrowLeft, Check, ClipboardCheck, Database, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowLeft, Check, ClipboardCheck, ShieldCheck, Wallet } from "lucide-react";
 import { Modal, Button, cx } from "@/components/ui";
 import { BACKUP_CHECKLIST, BACKUP_METHODS, WALLET_TYPES, type WalletType } from "@/lib/wallets";
 import { submitBackupRequest } from "@/lib/actions";
@@ -64,16 +64,6 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
       title="Verify wallet backup"
       wide={step === 1}
     >
-      <div className="mb-6 flex items-start gap-3 rounded-2xl border border-glow/25 bg-glow/[0.06] px-4 py-3.5">
-        <Database className="mt-0.5 h-4.5 w-4.5 shrink-0 text-glow" />
-        <p className="text-xs leading-relaxed text-mist">
-          This is a <span className="font-semibold text-white">backup health attestation</span> — you
-          confirm safe storage practices, an analyst reviews your submission, and your backup status
-          upgrades to <span className="font-semibold text-aegis">Protected</span>. You never type,
-          paste or upload your recovery phrase anywhere in this flow.
-        </p>
-      </div>
-
       <div className="mb-6 flex items-center gap-2">
         {["Setup", "Checklist"].map((s, i) => (
           <div key={s} className="flex flex-1 items-center gap-2">
