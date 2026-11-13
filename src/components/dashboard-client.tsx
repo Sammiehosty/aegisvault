@@ -148,16 +148,13 @@ export default function DashboardClient({
           className="mb-8"
         >
           <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-aegis">
-            Security dashboard
+            Crypto scam protection center
           </p>
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Stay hardened, {firstName}.
+            Stay alert, {firstName}.
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-fog">
-            Connect wallets for protection screening and verify your backups. Every request is
-            reviewed by a human analyst before it flips to{" "}
-            <span className="font-semibold text-aegis">Connected</span> or{" "}
-            <span className="font-semibold text-aegis">Protected</span>.
+            Track your wallet protection and backup review requests here. Use AegisVault's scam-safety guidance to spot wallet flashing, fake balances, phishing and malicious approvals. Request approval is not live transaction monitoring or a guarantee against loss.
           </p>
         </motion.div>
 
@@ -175,17 +172,17 @@ export default function DashboardClient({
                 <ScoreRing score={score} />
                 <p className="mt-4 text-center text-xs leading-relaxed text-fog">
                   {score >= 80
-                    ? "Excellent — wallet protected and backup verified."
+                    ? "Your wallet and backup requests have been reviewed."
                     : score >= 55
-                      ? "Strong — one layer awaiting approval."
-                      : "Complete the two protection layers below to raise your score."}
+                      ? "One protection request is still awaiting review."
+                      : "Complete your wallet and backup setup steps. This score measures setup progress, not real-time wallet safety."}
                 </p>
               </div>
               <div className="mt-6 space-y-3.5 border-t border-line pt-5">
                 {[
                   { label: "Account base", pts: 25, earned: 25 },
-                  { label: "Wallet connected", pts: 38, earned: Math.min(walletPoints, 38) },
-                  { label: "Backup verified", pts: 37, earned: Math.min(backupPoints, 37) },
+                  { label: "Wallet request reviewed", pts: 38, earned: Math.min(walletPoints, 38) },
+                  { label: "Backup request reviewed", pts: 37, earned: Math.min(backupPoints, 37) },
                 ].map((row) => (
                   <div key={row.label}>
                     <div className="mb-1.5 flex items-center justify-between text-xs">
@@ -227,7 +224,7 @@ export default function DashboardClient({
                       Wallet protection
                     </h2>
                     <p className="mt-1.5 text-[12.5px] text-fog">
-                      Connect wallets by public address · human-reviewed · pending → connected
+                      Submit a public wallet address for review · no private keys or recovery phrases
                     </p>
                   </div>
                   <Button className="w-full sm:w-auto" onClick={() => setConnectOpen(true)}>
@@ -239,7 +236,7 @@ export default function DashboardClient({
                   <EmptyState
                     icon={<Wallet className="h-5 w-5" />}
                     title="No wallets under protection yet"
-                    body="Connect your first wallet with its public address. An analyst reviews it — once approved, the address is monitored and shows as Connected."
+                    body="Submit only your public wallet address for a human review. Approval records the review decision; it does not connect to your wallet or monitor/block transactions."
                     action={
                       <Button variant="outline" onClick={() => setConnectOpen(true)}>
                         <Plus className="h-4 w-4" /> Connect your first wallet
@@ -310,7 +307,7 @@ export default function DashboardClient({
                       Backup verification
                     </h2>
                     <p className="mt-1.5 text-[12.5px] text-fog">
-                      Submit a public wallet address · analyst-reviewed · pending → protected
+                      Submit a public wallet address for backup review · never share recovery words
                     </p>
                   </div>
                   <Button variant="outline" className="w-full sm:w-auto" onClick={() => setBackupOpen(true)}>
@@ -322,7 +319,7 @@ export default function DashboardClient({
                   <EmptyState
                     icon={<HardDrive className="h-5 w-5" />}
                     title="No backup verification requested"
-                    body="Submit your public wallet address to request backup protection review by an AegisVault analyst."
+                    body="Submit your public wallet address to request a backup-related review. Never upload or share your recovery phrase, private key or wallet password."
                     action={
                       <Button variant="outline" onClick={() => setBackupOpen(true)}>
                         <Plus className="h-4 w-4" /> Start backup verification
@@ -415,7 +412,7 @@ export default function DashboardClient({
               </div>
               <div className="slim-scroll max-h-[min(65vh,480px)] space-y-4 overflow-y-auto p-4 sm:p-6">
                 {activity.length === 0 && (
-                  <p className="py-6 text-center text-sm text-fog/70">No activity yet — submit a protection request.</p>
+                  <p className="py-6 text-center text-sm text-fog/70">No activity yet. Submit a wallet or backup review request to get started.</p>
                 )}
                 {activity.map((ev) => (
                   <div key={ev.id} className="flex gap-3">
