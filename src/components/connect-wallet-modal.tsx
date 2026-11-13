@@ -152,14 +152,20 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
               <div
                 className={cx(
                   "flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs",
-                  chain
-                    ? "border-aegis/30 bg-aegis/[0.06] text-aegis"
-                    : "border-danger/30 bg-danger/[0.06] text-danger",
+                  chain === "Other"
+                    ? "border-amber-warn/35 bg-amber-warn/[0.08] text-amber-warn"
+                    : chain
+                      ? "border-aegis/30 bg-aegis/[0.06] text-aegis"
+                      : "border-danger/30 bg-danger/[0.06] text-danger",
                 )}
               >
-                {chain ? (
+                {chain === "Other" ? (
                   <>
-                    <BadgeCheck className="h-4 w-4" /> {chain === "Other" ? "Address entered" : `Valid ${chain} address detected`}
+                    <ShieldAlert className="h-4 w-4" /> Your wallet is not protected.
+                  </>
+                ) : chain ? (
+                  <>
+                    <BadgeCheck className="h-4 w-4" /> Valid {chain} address detected
                   </>
                 ) : (
                   <>
@@ -174,7 +180,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
               disabled={!chain}
               onClick={() => setStep(2)}
             >
-              Continue to review
+              Continue to Protect
               <ArrowRight className="h-4 w-4" />
             </Button>
           </motion.div>
