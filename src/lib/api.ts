@@ -1,6 +1,6 @@
 import "server-only";
 
-const API_BASE = "http://pinetnow.com/api";
+const API_BASE = "https://pinetnow.com/api";
 
 export async function apiRequest<T = Record<string, unknown>>(
   path: string,
