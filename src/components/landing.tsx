@@ -87,7 +87,7 @@ function Nav() {
           <a href="#threats" className="transition hover:text-white">Threat library</a>
           <a href="#how" className="transition hover:text-white">How it works</a>
           <a href="#rules" className="transition hover:text-white">Golden rules</a>
-          <a href="#review" className="transition hover:text-white">Human review</a>
+          <a href="#review" className="transition hover:text-white">System review</a>
         </nav>
         <div className="flex items-center gap-2.5">
           <Link
@@ -97,7 +97,7 @@ function Nav() {
             Sign in
           </Link>
           <Link
-            href="/register"
+            href="/login"
             className="group inline-flex items-center gap-1.5 rounded-xl bg-aegis px-4 py-2 text-[13.5px] font-bold text-[#04120c] shadow-[0_8px_30px_-8px_rgba(23,232,160,0.6)] transition hover:bg-[#3cf5b4]"
           >
             Get protected
@@ -147,7 +147,7 @@ function Hero() {
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.85, delay: 0.08, ease }}
-            className="mt-6 font-display text-[44px] font-bold leading-[1.02] tracking-[-0.03em] text-white sm:text-6xl lg:text-[68px]"
+            className="mt-6 font-display text-[30px] font-bold leading-[1.02] tracking-[-0.03em] text-white sm:text-6xl lg:text-[68px]"
           >
             Stay ahead of crypto scams.
             <br />
@@ -160,7 +160,7 @@ function Hero() {
             transition={{ duration: 0.85, delay: 0.16, ease }}
             className="mt-6 max-w-xl text-[15.5px] leading-relaxed text-fog sm:text-base"
           >
-            AegisVault helps you recognise and reduce exposure to wallet flashing, fake token balances, phishing links, malicious approvals, address poisoning and recovery-phrase theft. Use practical safety guidance and request a human review of your public wallet address. We do not custody funds, and we{" "}
+            AegisVault helps you recognise and reduce exposure to wallet flashing, fake token balances, phishing links, malicious approvals, address poisoning and recovery-phrase theft. Use practical safety guidance and request a System review of your public wallet address. We do not custody funds, and we{" "}
             <span className="font-semibold text-white">never ask for your recovery phrase. Ever.</span>
           </motion.p>
 
@@ -178,11 +178,11 @@ function Hero() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <a
-              href="#how"
+              href="login"
               className="inline-flex items-center gap-2 rounded-xl border border-line-strong bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-mist transition hover:border-aegis/40 hover:text-white"
             >
               <BookOpenCheck className="h-4 w-4 text-aegis" />
-              How protection works
+              Login
             </a>
           </motion.div>
 
@@ -192,7 +192,7 @@ function Hero() {
             transition={{ duration: 1, delay: 0.4 }}
             className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-fog"
           >
-            {["Zero custody", "Public addresses only", "Human-reviewed requests", "Seed phrases never collected"].map(
+            {["Zero custody", "Public addresses only", "System-reviewed requests", "Seed phrases never stored"].map(
               (t) => (
                 <span key={t} className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-aegis" />
@@ -377,7 +377,7 @@ function Threats() {
           <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-danger/25 bg-danger/[0.07] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-danger">
             <Radar className="h-3.5 w-3.5" /> Threat library
           </p>
-          <h2 className="font-display text-4xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
+          <h2 className="font-display text-3xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
             Know the scam before <span className="text-gradient">it knows you.</span>
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-fog">
@@ -421,7 +421,7 @@ const STEPS = [
   {
     icon: ClipboardCheck,
     step: "03",
-    title: "Human compliance review",
+    title: "System compliance review",
     body: "Your request appears as Pending while it awaits review. The dashboard shows the review decision when it is recorded. Approval means the request was reviewed; it does not mean AegisVault can control, monitor or guarantee the safety of your wallet.",
   },
 ];
@@ -435,7 +435,7 @@ function HowItWorks() {
             <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-aegis/25 bg-aegis/[0.07] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-aegis">
               <Landmark className="h-3.5 w-3.5" /> The protocol
             </p>
-            <h2 className="font-display text-4xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
+            <h2 className="font-display text-3xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
               Three steps to a <span className="text-gradient">hardened wallet.</span>
             </h2>
           </div>
@@ -491,7 +491,7 @@ function GoldenRules() {
             <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-warn/25 bg-amber-warn/[0.07] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-warn">
               <AlertTriangle className="h-3.5 w-3.5" /> Golden rules
             </p>
-            <h2 className="font-display text-4xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
+            <h2 className="font-display text-3xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
               Eight habits that help reduce <span className="text-gradient">your scam risk.</span>
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-fog">
@@ -546,7 +546,7 @@ function ReviewExplainer() {
     },
     {
       icon: UserCheck,
-      title: "Human reviewer",
+      title: "System reviewer",
       body: "A reviewer checks the submitted request details. Approval is a review status, not a security certification or guarantee.",
     },
     {
@@ -561,13 +561,13 @@ function ReviewExplainer() {
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <Reveal>
             <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-glow/25 bg-glow/[0.07] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-glow">
-              <Flame className="h-3.5 w-3.5" /> Human review layer
+              <Flame className="h-3.5 w-3.5" /> System review layer
             </p>
-            <h2 className="font-display text-4xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
+            <h2 className="font-display text-3xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
               Understand the risks. <span className="text-gradient">Review every request.</span>
             </h2>
             <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-fog">
-              Wallet and backup requests are submitted for human review and their status is shown in your dashboard. A review does not scan live transactions, revoke malicious permissions or stop a transfer. Keep using your wallet's own security controls and verify every transaction yourself.
+              Wallet and backup requests are submitted for System review and their status is shown in your dashboard. A review does not scan live transactions, revoke malicious permissions or stop a transfer. Keep using your wallet's own security controls and verify every transaction yourself.
             </p>
             <div className="mt-8 space-y-5">
               {items.map((it) => (
@@ -615,10 +615,7 @@ function ReviewExplainer() {
                   </motion.div>
                 ))}
               </div>
-              <p className="mt-5 flex items-center gap-2 text-xs text-fog">
-                <Lock className="h-3.5 w-3.5 text-aegis" />
-                Illustrative examples only. Never submit recovery phrases, private keys or signing requests.
-              </p>
+              
             </div>
           </Reveal>
         </div>
@@ -674,7 +671,7 @@ function Footer() {
           <div className="max-w-sm">
             <Logo />
             <p className="mt-4 text-[13px] leading-relaxed text-fog">
-              Crypto scam awareness and wallet security guidance, with a human-reviewed public-address request workflow. AegisVault does not hold your crypto or need your recovery phrase, private keys or wallet passwords.
+              Crypto scam awareness and wallet security guidance, with a System-reviewed public-address request workflow. AegisVault does not hold your crypto or need your recovery phrase, private keys or wallet passwords.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-10 text-[13px] sm:grid-cols-3">
@@ -699,16 +696,16 @@ function Footer() {
               <ul className="space-y-2 text-fog">
                 <li className="inline-flex items-center gap-1.5"><EyeOff className="h-3.5 w-3.5 text-aegis" /> Zero seed collection</li>
                 <li className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-aegis" /> Non-custodial</li>
-                <li className="inline-flex items-center gap-1.5"><UserCheck className="h-3.5 w-3.5 text-aegis" /> Human review</li>
+                <li className="inline-flex items-center gap-1.5"><UserCheck className="h-3.5 w-3.5 text-aegis" /> System review</li>
               </ul>
             </div>
           </div>
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-line/60 pt-6 text-xs text-fog/70 sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} AegisVault Security Labs. Education and request review only — not live transaction monitoring, custody or financial advice.</p>
+          <p>© {new Date().getFullYear()} AegisVault Security Labs. </p>
           <p className="flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5 text-aegis" />
-            If a site asks for your recovery phrase, it is a scam. Full stop.
+            If a anyone asks for your recovery phrase, it is a scam. Full stop.
           </p>
         </div>
       </div>
