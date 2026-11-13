@@ -95,7 +95,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
             <p className="mb-4 text-[13px] text-fog">
               Select the wallet whose backup you want to protect with AegisVault:
             </p>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {WALLET_TYPES.map((w) => (
                 <button
                   key={w.id}
@@ -104,19 +104,19 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
                     setStep(1);
                   }}
                   className={cx(
-                    "group flex flex-col items-start gap-2.5 rounded-2xl border border-line bg-white/[0.02] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-aegis/40 hover:bg-aegis/[0.05]",
+                    "group flex flex-col items-start gap-2 rounded-xl border border-line bg-white/[0.02] p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-aegis/40 hover:bg-aegis/[0.05]",
                     wallet?.id === w.id && "border-aegis/50 bg-aegis/[0.07]",
                   )}
                 >
                   <span
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white/[0.04]"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white/[0.04]"
                     style={{ color: w.accent }}
                   >
-                    <Wallet className="h-4.5 w-4.5" />
+                    <Wallet className="h-4 w-4" />
                   </span>
                   <span>
-                    <span className="block text-[13px] font-semibold text-white">{w.name}</span>
-                    <span className="block text-[10.5px] text-fog">{w.chain}</span>
+                    <span className="block text-xs font-semibold text-white">{w.name}</span>
+                    <span className="block text-[10px] text-fog">{w.chain}</span>
                   </span>
                 </button>
               ))}
