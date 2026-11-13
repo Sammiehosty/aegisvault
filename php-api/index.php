@@ -96,7 +96,18 @@ try {
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
-if ($base && str_starts_with($path, $base)) $path = substr($path, strlen($base));
+
+// Depending on cPanel/Apache PHP-FPM settings, SCRIPT_NAME may be either
+// /api/index.php or /index.php after the rewrite. Strip the script directory
+// when present, then remove the public /api mount prefix if it remains.
+if ($base !== '' && $base !== '/' && ($path === $base || str_starts_with($path, $base . '/'))) {
+    $path = substr($path, strlen($base));
+}
+if ($path === '/api') {
+    $path = '/';
+} elseif (str_starts_with($path, '/api/')) {
+    $path = substr($path, 4);
+}
 $path = '/' . trim($path, '/');
 $data = body();
 
