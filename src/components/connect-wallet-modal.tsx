@@ -70,7 +70,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
     >
       {/* progress */}
       <div className="mb-6 flex items-center gap-2">
-        {["Wallet", "Address", "Review"].map((s, i) => (
+        {["Wallet", "Address", "Protect"].map((s, i) => (
           <div key={s} className="flex flex-1 items-center gap-2">
             <span
               className={cx(
@@ -134,9 +134,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
               <ArrowLeft className="h-3.5 w-3.5" /> {wallet.name} selected — change
             </button>
 
-            <Field
-              label="Public wallet address"
-            >
+            <Field label="Public wallet address">
               <Textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
@@ -214,11 +212,9 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
             <div className="flex items-start gap-3 rounded-2xl border border-line bg-white/[0.02] px-4 py-3.5">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-aegis" />
               <p className="text-xs leading-relaxed text-fog">
-                After submission your request enters{" "}
-                <span className="font-semibold text-amber-warn">Pending review</span>. A compliance
-                analyst screens the address against fraud datasets and approves it — your status then
-                flips to <span className="font-semibold text-aegis">Connected</span> and the wallet is
-                covered by AegisVault protection.
+                Protect your wallet with AegisVault to help guard against crypto scams, fraudulent
+                activity, and other crypto-related threats. Submit your wallet for protection review
+                to get started.
               </p>
             </div>
 
@@ -227,7 +223,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
                 <ArrowLeft className="h-4 w-4" /> Back
               </Button>
               <Button onClick={submit} loading={pending} className="flex-[2] py-3">
-                Submit for review
+                Protect
                 <ShieldCheck className="h-4 w-4" />
               </Button>
             </div>
