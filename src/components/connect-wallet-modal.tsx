@@ -96,7 +96,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
             <p className="mb-4 text-[13px] text-fog">
               Select the wallet you want to place under AegisVault protection:
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2">
               {WALLET_TYPES.map((w) => (
                 <button
                   key={w.id}
