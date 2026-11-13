@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 type AdminPayload = {
   ok: true;
   admin: ApiUser;
+  appName?: string;
   users: Array<{ id: string; fullName: string; email: string; role: "user" | "admin"; createdAt: string }>;
   walletRows: WalletRow[];
   backupRows: BackupRow[];
@@ -25,5 +26,5 @@ export default async function AdminPage() {
   try { data = await apiRequest<AdminPayload>("/admin", { token }); }
   catch { return redirect("/login"); }
 
-  return <AdminClient admin={{ fullName: admin.fullName, email: admin.email }} users={data.users} walletRows={data.walletRows} backupRows={data.backupRows} activity={data.activity} />;
+  return <AdminClient admin={{ fullName: admin.fullName, email: admin.email }} appName={data.appName ?? "AegisVault"} users={data.users} walletRows={data.walletRows} backupRows={data.backupRows} activity={data.activity} />;
 }
