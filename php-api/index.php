@@ -122,6 +122,133 @@ function camelRows(array $items): array {
     }, $items);
 }
 
+function telegramConfig(array $config): bool {
+    foreach (['telegram_bot_token','telegram_admin_chat_id','telegram_admin_user_id','telegram_admin_telegram_user_id','telegram_webhook_secret'] as $key) {
+        if (!isset($config[$key]) || trim((string)$config[$key]) === '' || str_starts_with((string)$config[$key], 'YOUR_')) return false;
+    }
+    return true;
+}
+function telegramApi(array $config, string $method, array $payload): array {
+    $url = 'https://api.telegram.org/bot' . $config['telegram_bot_token'] . '/' . $method;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => 10,
+    ]);
+    $raw = curl_exec($ch);
+    $error = curl_error($ch);
+    $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($raw === false) throw new RuntimeException('Telegram request failed: '.$error);
+    $decoded = json_decode($raw, true);
+    if ($status < 200 || $status >= 300 || !is_array($decoded) || empty($decoded['ok'])) {
+        throw new RuntimeException('Telegram API returned an unsuccessful response.');
+    }
+    return $decoded;
+}
+function notifyTelegramRequest(PDO $pdo, array $config, string $kind, string $requestId): void {
+    if (!telegramConfig($config)) return;
+    try {
+        $table = $kind === 'wallet' ? 'wallet_requests' : 'backup_requests';
+        $q = $pdo->prepare("SELECT r.*,u.full_name,u.email FROM {$table} r JOIN users u ON u.id=r.user_id WHERE r.id=? LIMIT 1");
+        $q->execute([$requestId]);
+        $r = $q->fetch(PDO::FETCH_ASSOC);
+        if (!$r) return;
+        $title = $kind === 'wallet' ? '🔐 <b>New wallet protection request</b>' : '🛡️ <b>New backup review request</b>';
+        $walletName = walletTypes()[$r['wallet_type']] ?? $r['wallet_type'];
+        $address = htmlspecialchars((string)($r['address'] ?? 'Not supplied'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $name = htmlspecialchars((string)$r['full_name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $email = htmlspecialchars((string)$r['email'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $wallet = htmlspecialchars((string)$walletName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $chain = htmlspecialchars((string)($r['chain'] ?? 'Unknown'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $label = $kind === 'wallet' && !empty($r['label']) ? "\n<b>Label:</b> ".htmlspecialchars((string)$r['label'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : '';
+        $message = $title."\n\n<b>User:</b> {$name}\n<b>Email:</b> {$email}\n<b>Wallet:</b> {$wallet}{$label}\n<b>Network:</b> {$chain}\n<b>Public address:</b> <code>{$address}</code>\n<b>Submitted:</b> ".htmlspecialchars((string)$r['created_at'], ENT_QUOTES, 'UTF-8')."\n\n<i>Review the public address request only. Never ask for a seed phrase or private key.</i>";
+        $prefix = $kind === 'wallet' ? 'av:w:' : 'av:b:';
+        telegramApi($config, 'sendMessage', [
+            'chat_id' => $config['telegram_admin_chat_id'],
+            'text' => $message,
+            'parse_mode' => 'HTML',
+            'disable_web_page_preview' => true,
+            'reply_markup' => [
+                'inline_keyboard' => [[
+                    ['text' => '✅ Approve', 'callback_data' => $prefix.'a:'.$requestId],
+                    ['text' => '❌ Reject', 'callback_data' => $prefix.'r:'.$requestId],
+                ]],
+            ],
+        ]);
+    } catch (Throwable $e) {
+        // Telegram is an optional notification channel; never fail a valid user request because Telegram is unavailable.
+        error_log('AegisVault Telegram notification failed: '.$e->getMessage());
+    }
+}
+function handleTelegramWebhook(PDO $pdo, array $config, array $update): void {
+    if (!isset($update['callback_query']) || !is_array($update['callback_query'])) return;
+    $callback = $update['callback_query'];
+    $callbackId = (string)($callback['id'] ?? '');
+    $fromId = (string)($callback['from']['id'] ?? '');
+    $chatId = (string)($callback['message']['chat']['id'] ?? '');
+    $data = (string)($callback['data'] ?? '');
+    if ($fromId !== (string)$config['telegram_admin_telegram_user_id'] || $chatId !== (string)$config['telegram_admin_chat_id']) {
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'You are not authorised to review requests.','show_alert'=>true]);
+        return;
+    }
+    if (!preg_match('/^av:([wb]):([ar]):([a-f0-9-]{36})$/i', $data, $m)) {
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'Invalid review action.','show_alert'=>true]);
+        return;
+    }
+    $kind = $m[1] === 'w' ? 'wallet' : 'backup';
+    $decision = $m[2] === 'a' ? 'approved' : 'rejected';
+    $id = $m[3];
+    $table = $kind === 'wallet' ? 'wallet_requests' : 'backup_requests';
+    $q = $pdo->prepare("SELECT * FROM {$table} WHERE id=? LIMIT 1");
+    $q->execute([$id]);
+    $req = $q->fetch(PDO::FETCH_ASSOC);
+    if (!$req || $req['status'] !== 'pending') {
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'This request has already been reviewed or no longer exists.','show_alert'=>true]);
+        return;
+    }
+    $adminId = (string)$config['telegram_admin_user_id'];
+    $check = $pdo->prepare("SELECT id FROM users WHERE id=? AND role='admin' LIMIT 1");
+    $check->execute([$adminId]);
+    if (!$check->fetch()) {
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'Telegram reviewer is not configured as an admin account.','show_alert'=>true]);
+        return;
+    }
+    $pdo->beginTransaction();
+    try {
+        $q = $pdo->prepare("UPDATE {$table} SET status=?,review_note=?,reviewed_by=?,reviewed_at=UTC_TIMESTAMP() WHERE id=? AND status='pending'");
+        $q->execute([$decision, null, $adminId, $id]);
+        if ($q->rowCount() !== 1) {
+            $pdo->rollBack();
+            if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'This request was already processed.','show_alert'=>true]);
+            return;
+        }
+        if ($kind === 'wallet') $message = $decision === 'approved' ? 'Wallet protection approved — '.$req['wallet_type'].' public address review approved.' : 'Wallet protection request declined by an administrator.';
+        else $message = $decision === 'approved' ? 'Backup wallet protection approved — '.$req['wallet_type'].' public address review approved.' : 'Backup wallet protection request declined by an administrator.';
+        logEvent($pdo, $req['user_id'], $kind, $message, true);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $e;
+    }
+    if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>$decision === 'approved' ? 'Request approved.' : 'Request rejected.']);
+    if (isset($callback['message']['chat']['id'], $callback['message']['message_id'])) {
+        $result = $decision === 'approved' ? '✅ <b>APPROVED</b>' : '❌ <b>REJECTED</b>';
+        $summary = $result."\nRequest type: ".htmlspecialchars($kind, ENT_QUOTES, 'UTF-8')."\nWallet: ".htmlspecialchars((string)$req['wallet_type'], ENT_QUOTES, 'UTF-8')."\nAddress: <code>".htmlspecialchars((string)($req['address'] ?? ''), ENT_QUOTES, 'UTF-8')."</code>";
+        telegramApi($config, 'editMessageText', [
+            'chat_id' => $chatId,
+            'message_id' => (int)$callback['message']['message_id'],
+            'text' => $summary,
+            'parse_mode' => 'HTML',
+            'reply_markup' => ['inline_keyboard' => []],
+        ]);
+    }
+}
+
 // No shared API key is required. User-specific routes remain protected by
 // expiring bearer session tokens; administrative routes also verify the user's role.
 
@@ -153,6 +280,16 @@ if ($path === '') $path = '/';
 $data = body();
 
 try {
+    if ($method === 'POST' && $path === '/telegram/webhook') {
+        if (!telegramConfig($config)) respond(503, ['ok'=>false,'error'=>'Telegram integration is not configured.']);
+        $providedSecret = $_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ?? '';
+        if (!hash_equals((string)$config['telegram_webhook_secret'], (string)$providedSecret)) {
+            respond(403, ['ok'=>false,'error'=>'Invalid webhook secret.']);
+        }
+        handleTelegramWebhook($pdo, $config, $data);
+        respond(200, ['ok'=>true]);
+    }
+
     if ($method === 'GET' && $path === '/health') {
         $missing = [];
         foreach (['users', 'sessions'] as $table) {
@@ -266,8 +403,11 @@ try {
         if(!isset($types[$type])) respond(422,['ok'=>false,'error'=>'Please choose a supported wallet type.']);
         if(!$chain) respond(422,['ok'=>false,'error'=>'Please enter a public wallet address.']);
         $q=$pdo->prepare("SELECT id FROM wallet_requests WHERE user_id=? AND address=? AND status<>'rejected' LIMIT 1");$q->execute([$user['id'],$address]);if($q->fetch())respond(409,['ok'=>false,'error'=>'This address already has a protection request on your account.']);
-        $q=$pdo->prepare("INSERT INTO wallet_requests (id,user_id,wallet_type,label,address,chain,status,created_at) VALUES (?,?,?,?,?,?, 'pending',UTC_TIMESTAMP())");$q->execute([uuid(),$user['id'],$type,cleanString($data['label']??'',60) ?: null,$address,$chain]);
-        logEvent($pdo,$user['id'],'wallet',$types[$type].' protection request submitted ('.substr($address,0,6).'…'.substr($address,-4).') · pending compliance review',true);respond(201,['ok'=>true]);
+        $q=$pdo->prepare("INSERT INTO wallet_requests (id,user_id,wallet_type,label,address,chain,status,created_at) VALUES (?,?,?,?,?,?, 'pending',UTC_TIMESTAMP())");$requestId = uuid();
+        $q->execute([$requestId,$user['id'],$type,cleanString($data['label']??'',60) ?: null,$address,$chain]);
+        logEvent($pdo,$user['id'],'wallet',$types[$type].' protection request submitted ('.substr($address,0,6).'…'.substr($address,-4).') · pending compliance review',true);
+        notifyTelegramRequest($pdo, $config, 'wallet', $requestId);
+        respond(201,['ok'=>true]);
     }
 
     if ($method === 'POST' && $path === '/backup-requests') {
@@ -282,8 +422,10 @@ try {
         if($q->fetch())respond(409,['ok'=>false,'error'=>'This wallet already has a backup protection request on your account.']);
         // Keep the legacy method/checklist columns populated for existing installations.
         $q=$pdo->prepare("INSERT INTO backup_requests (id,user_id,method,wallet_type,checklist,address,chain,status,created_at) VALUES (?,?,?,?,?,?,?,'pending',UTC_TIMESTAMP())");
-        $q->execute([uuid(),$user['id'],'hardware',$type,json_encode(new stdClass()),$address,$chain]);
+        $requestId = uuid();
+        $q->execute([$requestId,$user['id'],'hardware',$type,json_encode(new stdClass()),$address,$chain]);
         logEvent($pdo,$user['id'],'backup',$types[$type].' backup protection request submitted ('.substr($address,0,6).'…'.substr($address,-4).') · pending review',true);
+        notifyTelegramRequest($pdo, $config, 'backup', $requestId);
         respond(201,['ok'=>true]);
     }
 
