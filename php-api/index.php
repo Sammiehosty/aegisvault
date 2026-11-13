@@ -28,8 +28,26 @@ function cleanString(mixed $value, int $max = 255): string {
 function publicUser(array $u): array {
     return ['id'=>$u['id'], 'fullName'=>$u['full_name'], 'email'=>$u['email'], 'role'=>$u['role'], 'createdAt'=>$u['created_at']];
 }
+function authorizationHeader(): string {
+    $header = $_SERVER['HTTP_AUTHORIZATION']
+        ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+        ?? '';
+
+    // Some cPanel/Apache + PHP-FPM configurations expose Authorization
+    // through getallheaders() instead of $_SERVER.
+    if ($header === '' && function_exists('getallheaders')) {
+        foreach (getallheaders() ?: [] as $name => $value) {
+            if (strcasecmp((string)$name, 'Authorization') === 0) {
+                $header = (string)$value;
+                break;
+            }
+        }
+    }
+    return trim((string)$header);
+}
+
 function authUser(PDO $pdo): ?array {
-    $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $header = authorizationHeader();
     if (!preg_match('/^Bearer\s+([a-f0-9]{64})$/i', $header, $m)) return null;
     $hash = hash('sha256', $m[1]);
     $q = $pdo->prepare('SELECT u.* FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at > UTC_TIMESTAMP() LIMIT 1');
@@ -110,7 +128,7 @@ try {
         if(!$user) respond(401,['ok'=>false,'error'=>'Unauthenticated']); respond(200,['ok'=>true,'user'=>publicUser($user)]);
     }
     if ($method === 'POST' && $path === '/auth/logout') {
-        if ($user) { $h=$_SERVER['HTTP_AUTHORIZATION'] ?? ''; if(preg_match('/^Bearer\s+([a-f0-9]{64})$/i',$h,$m)){ $q=$pdo->prepare('DELETE FROM sessions WHERE token_hash=?');$q->execute([hash('sha256',$m[1])]); } }
+        if ($user) { $h=authorizationHeader(); if(preg_match('/^Bearer\s+([a-f0-9]{64})$/i',$h,$m)){ $q=$pdo->prepare('DELETE FROM sessions WHERE token_hash=?');$q->execute([hash('sha256',$m[1])]); } }
         respond(200,['ok'=>true]);
     }
     if (!$user) respond(401,['ok'=>false,'error'=>'Your session has expired. Please sign in again.']);
