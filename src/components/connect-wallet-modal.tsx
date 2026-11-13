@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
-  EyeOff,
   Globe,
   ShieldAlert,
   ShieldCheck,
@@ -69,17 +68,6 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
       title="Connect a wallet"
       wide={step === 0}
     >
-      {/* never-ask banner */}
-      <div className="mb-6 flex items-start gap-3 rounded-2xl border border-aegis/25 bg-aegis/[0.07] px-4 py-3.5">
-        <EyeOff className="mt-0.5 h-4.5 w-4.5 shrink-0 text-aegis" />
-        <p className="text-xs leading-relaxed text-mist">
-          <span className="font-bold text-aegis">We will never ask for your recovery phrase.</span>{" "}
-          Connecting AegisVault protection only ever requires your{" "}
-          <span className="font-semibold text-white">public wallet address</span> — the same string you
-          share to receive payments. Anyone who asks for 12/24 words is attempting theft.
-        </p>
-      </div>
-
       {/* progress */}
       <div className="mb-6 flex items-center gap-2">
         {["Wallet", "Address", "Review"].map((s, i) => (
@@ -108,7 +96,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
             <p className="mb-4 text-[13px] text-fog">
               Select the wallet you want to place under AegisVault protection:
             </p>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
               {WALLET_TYPES.map((w) => (
                 <button
                   key={w.id}
