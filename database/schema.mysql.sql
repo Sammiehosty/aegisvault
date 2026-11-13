@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS backup_requests (
   method ENUM('paper','steel','hardware','shamir') NOT NULL,
   wallet_type VARCHAR(80) NOT NULL,
   checklist JSON NOT NULL,
+  address VARCHAR(255) NULL,
+  chain VARCHAR(40) NULL,
   status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
   review_note TEXT NULL,
   reviewed_by CHAR(36) NULL,
