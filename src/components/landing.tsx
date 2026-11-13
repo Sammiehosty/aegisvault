@@ -113,7 +113,7 @@ function Nav() {
 
 const MARQUEE_ITEMS = [
   "Seed-phrase phishing",
-  "Flash USDT & balance spoofing",
+  "Wallet flashing & fake balances",
   "Address poisoning",
   "Fake giveaways",
   "Drainer approvals",
@@ -160,9 +160,7 @@ function Hero() {
             transition={{ duration: 0.85, delay: 0.16, ease }}
             className="mt-6 max-w-xl text-[15.5px] leading-relaxed text-fog sm:text-base"
           >
-            AegisVault hardens your wallets against phishing, flash-balance fraud and
-            seed-phrase theft — with compliance-reviewed wallet protection and guided
-            backup verification. We hold nothing, we custody nothing, and we{" "}
+            AegisVault helps you recognise and reduce exposure to wallet flashing, fake token balances, phishing links, malicious approvals, address poisoning and recovery-phrase theft. Use practical safety guidance and request a human review of your public wallet address. We do not custody funds, and we{" "}
             <span className="font-semibold text-white">never ask for your recovery phrase. Ever.</span>
           </motion.p>
 
@@ -543,7 +541,7 @@ function ReviewExplainer() {
   const items = [
     {
       icon: Globe,
-      title: "Dataset screening",
+      title: "Public address review", 
       body: "Your public wallet address is included with your request so a reviewer can identify the wallet and network you submitted. This site does not currently perform live blockchain threat scanning.",
     },
     {
@@ -553,7 +551,7 @@ function ReviewExplainer() {
     },
     {
       icon: Smartphone,
-      title: "Live status updates",
+      title: "Dashboard request status", 
       body: "Your dashboard displays Pending, Connected or Protected request statuses after a review decision is recorded.",
     },
   ];
@@ -566,7 +564,7 @@ function ReviewExplainer() {
               <Flame className="h-3.5 w-3.5" /> Human review layer
             </p>
             <h2 className="font-display text-4xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
-              Automation flags. <span className="text-gradient">Humans decide.</span>
+              Understand the risks. <span className="text-gradient">Review every request.</span>
             </h2>
             <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-fog">
               Wallet and backup requests are submitted for human review and their status is shown in your dashboard. A review does not scan live transactions, revoke malicious permissions or stop a transfer. Keep using your wallet's own security controls and verify every transaction yourself.
