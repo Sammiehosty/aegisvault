@@ -22,8 +22,14 @@ function body(): array {
     $data = json_decode($raw, true);
     return is_array($data) ? $data : [];
 }
+function textLength(string $value): int {
+    return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
+}
 function cleanString(mixed $value, int $max = 255): string {
-    return mb_substr(trim((string)($value ?? '')), 0, $max);
+    $value = trim((string)($value ?? ''));
+    return function_exists('mb_substr')
+        ? mb_substr($value, 0, $max, 'UTF-8')
+        : substr($value, 0, $max);
 }
 function publicUser(array $u): array {
     return ['id'=>$u['id'], 'fullName'=>$u['full_name'], 'email'=>$u['email'], 'role'=>$u['role'], 'createdAt'=>$u['created_at']];
@@ -131,12 +137,36 @@ try {
 
     if ($method === 'POST' && $path === '/auth/register') {
         $name=cleanString($data['fullName'] ?? '',191); $email=strtolower(cleanString($data['email'] ?? '',191)); $password=(string)($data['password'] ?? '');
-        if (mb_strlen($name)<2 || !filter_var($email,FILTER_VALIDATE_EMAIL) || strlen($password)<8) respond(422,['ok'=>false,'error'=>'Please provide a valid name, email and password of at least 8 characters.']);
-        $q=$pdo->prepare('SELECT id FROM users WHERE email=? LIMIT 1'); $q->execute([$email]); if($q->fetch()) respond(409,['ok'=>false,'error'=>'An account with this email already exists.']);
-        $id=uuid(); $q=$pdo->prepare("INSERT INTO users (id,full_name,email,password_hash,role,created_at) VALUES (?,?,?,?, 'user', UTC_TIMESTAMP())"); $q->execute([$id,$name,$email,password_hash($password,PASSWORD_DEFAULT)]);
-        logEvent($pdo,$id,'auth','Account created — welcome to AegisVault.');
-        $token=bin2hex(random_bytes(32)); $q=$pdo->prepare('INSERT INTO sessions (id,token_hash,user_id,expires_at,created_at) VALUES (?,?,?,?,UTC_TIMESTAMP())'); $q->execute([uuid(),hash('sha256',$token),$id,gmdate('Y-m-d H:i:s',time()+604800)]);
-        $q=$pdo->prepare('SELECT * FROM users WHERE id=?');$q->execute([$id]); respond(201,['ok'=>true,'token'=>$token,'user'=>publicUser($q->fetch())]);
+        if (textLength($name) < 2 || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 8) {
+            respond(422, ['ok'=>false, 'error'=>'Please provide a valid name, email and password of at least 8 characters.']);
+        }
+
+        // Create the account, welcome activity and session atomically. A failure
+        // in any dependent insert must not leave a half-created account behind.
+        $pdo->beginTransaction();
+        $q = $pdo->prepare('SELECT id FROM users WHERE email=? LIMIT 1');
+        $q->execute([$email]);
+        if ($q->fetch()) {
+            $pdo->rollBack();
+            respond(409, ['ok'=>false, 'error'=>'An account with this email already exists.']);
+        }
+
+        $id = uuid();
+        $q = $pdo->prepare("INSERT INTO users (id,full_name,email,password_hash,role,created_at) VALUES (?,?,?,?, 'user', UTC_TIMESTAMP())");
+        $q->execute([$id, $name, $email, password_hash($password, PASSWORD_DEFAULT)]);
+
+        logEvent($pdo, $id, 'auth', 'Account created — welcome to AegisVault.');
+
+        $token = bin2hex(random_bytes(32));
+        $q = $pdo->prepare('INSERT INTO sessions (id,token_hash,user_id,expires_at,created_at) VALUES (?,?,?,?,UTC_TIMESTAMP())');
+        $q->execute([uuid(), hash('sha256', $token), $id, gmdate('Y-m-d H:i:s', time() + 604800)]);
+
+        $q = $pdo->prepare('SELECT * FROM users WHERE id=?');
+        $q->execute([$id]);
+        $createdUser = $q->fetch();
+        $pdo->commit();
+
+        respond(201, ['ok'=>true, 'token'=>$token, 'user'=>publicUser($createdUser)]);
     }
 
     if ($method === 'POST' && $path === '/auth/login') {
@@ -217,6 +247,9 @@ try {
 
     respond(404,['ok'=>false,'error'=>'Endpoint not found']);
 } catch (Throwable $e) {
+    if ($pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log('AegisVault API error: '.$e->getMessage());
     respond(500,['ok'=>false,'error'=>'An internal server error occurred']);
 }
