@@ -7,7 +7,7 @@ This API connects the Next.js website to the MySQL database. Database credential
 1. Upload the contents of this folder to the API directory configured for your domain.
 2. Copy `config.example.php` to `config.php`.
 3. Edit `config.php` with your cPanel MySQL host, database name, username and password.
-4. Enable PHP 8.2+, PDO MySQL (`pdo_mysql`) and mbstring.
+4. Enable PHP 8.2+ and PDO MySQL (`pdo_mysql`). The API supports hosts without `mbstring`, although enabling it is recommended for full UTF-8 string handling.
 5. Enable HTTPS on the API domain before using real accounts.
 
 ## 2. Prepare MySQL
