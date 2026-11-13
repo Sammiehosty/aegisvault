@@ -57,7 +57,7 @@ export function LoginForm() {
               toast.error(res.error);
               return;
             }
-            toast.success("Welcome back. Session secured.");
+            toast.success("Welcome back. Stay alert and stay in control.");
             router.push(res.redirect ?? "/dashboard");
             router.refresh();
           } catch {
@@ -86,7 +86,7 @@ export function LoginForm() {
       <p className="pt-2 text-center text-[13px] text-fog">
         New to AegisVault?{" "}
         <Link href="/register" className="font-semibold text-aegis transition hover:text-[#3cf5b4]">
-          Create a protected account
+          Create your scam-safety account
         </Link>
       </p>
     </form>
@@ -138,7 +138,7 @@ export function RegisterForm() {
               toast.error(res.error);
               return;
             }
-            toast.success("Account created. Your security journey begins.");
+            toast.success("Account created. Your scam-safety journey begins.");
             router.push(res.redirect ?? "/dashboard");
             router.refresh();
           } catch {
@@ -180,7 +180,7 @@ export function RegisterForm() {
       </p>
 
       <p className="pt-1 text-center text-[13px] text-fog">
-        Already protected?{" "}
+        Already have an account?{" "}
         <Link href="/login" className="font-semibold text-aegis transition hover:text-[#3cf5b4]">
           Sign in
         </Link>
