@@ -160,8 +160,7 @@ function Hero() {
             transition={{ duration: 0.85, delay: 0.16, ease }}
             className="mt-6 max-w-xl text-[15.5px] leading-relaxed text-fog sm:text-base"
           >
-            AegisVault helps you recognise and reduce exposure to wallet flashing, fake token balances, phishing links, malicious approvals, address poisoning and recovery-phrase theft. Use practical safety guidance and request a System review of your public wallet address. We do not custody funds, and we{" "}
-            <span className="font-semibold text-white">never ask for your recovery phrase. Ever.</span>
+            AegisVault helps you recognise and reduce exposure to wallet flashing, fake token balances, phishing links, malicious approvals, address poisoning and recovery-phrase theft. Use practical safety guidance and request a System review of your public wallet address. 
           </motion.p>
 
           <motion.div
@@ -192,7 +191,7 @@ function Hero() {
             transition={{ duration: 1, delay: 0.4 }}
             className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-fog"
           >
-            {["Zero custody", "Public addresses only", "System-reviewed requests", "Seed phrases never stored"].map(
+            {["Seed phrases never stored ", "Public addresses only", "System-reviewed requests", "Zero custody"].map(
               (t) => (
                 <span key={t} className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-aegis" />
@@ -688,7 +687,7 @@ function Footer() {
               <ul className="space-y-2 text-fog">
                 <li><Link href="/register" className="transition hover:text-white">Create account</Link></li>
                 <li><Link href="/login" className="transition hover:text-white">Sign in</Link></li>
-                <li><Link href="/login" className="transition hover:text-white">Admin console</Link></li>
+                <li><Link href="/login" className="transition hover:text-white">Protect Wallet</Link></li>
               </ul>
             </div>
             <div>
