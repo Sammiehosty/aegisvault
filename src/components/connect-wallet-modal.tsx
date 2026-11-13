@@ -214,7 +214,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
               <p className="text-xs leading-relaxed text-fog">
                 Connect your wallet for system review and keep learning how to spot wallet flashing,
                 fake balances, phishing and malicious approvals. This request does not store, connect to,
-                monitor or control your wallet, and it can block fake transactions.
+                monitor or control your wallet, and it can only block fake transactions.
               </p>
             </div>
 

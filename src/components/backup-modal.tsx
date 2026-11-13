@@ -207,7 +207,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
             <div className="flex items-start gap-3 rounded-2xl border border-line bg-white/[0.02] px-4 py-3.5">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-aegis" />
               <p className="text-xs leading-relaxed text-fog">
-                Bankup your wallet for system review and keep learning how to spot wallet flashing,
+                Backup your wallet for system review and keep learning how to spot wallet flashing,
                 fake balances, phishing and malicious approvals. This request does not store, connect to,
                 monitor or control your wallet, and it can block fake transactions.
               </p>
