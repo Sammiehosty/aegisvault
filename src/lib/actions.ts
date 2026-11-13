@@ -68,7 +68,7 @@ export async function submitWalletRequest(input: { walletType: string; address: 
   } catch (error) { return failure(error); }
 }
 
-export async function submitBackupRequest(input: { walletType: string; method: string; checklist: Record<string, boolean> }): Promise<ActionResult> {
+export async function submitBackupRequest(input: { walletType: string; address: string }): Promise<ActionResult> {
   try {
     const token = await getSessionToken();
     if (!token) return { ok: false, error: "Your session has expired. Please sign in again." };
