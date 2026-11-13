@@ -339,7 +339,7 @@ export default function AdminClient({
                         <td className="py-3.5 pr-4 text-mist">
                           {backupRows.filter((b) => b.userId === u.id).length}
                         </td>
-                        <td className="py-3.5 text-fog">{fmtDate(u.createdAt)}</td><td className="py-3.5"><Button variant="danger" onClick={() => removeUser(u)}><Trash2 className="h-4 w-4" /> Delete</Button></td>
+                        <td className="py-3.5 text-fog">{fmtDate(u.createdAt)}</td><td className="py-3.5">{u.role === "user" ? <Button variant="danger" onClick={() => removeUser(u)}><Trash2 className="h-4 w-4" /> Delete</Button> : <span className="text-xs text-fog">Protected</span>}</td>
                       </tr>
                     ))}
                   </tbody>
