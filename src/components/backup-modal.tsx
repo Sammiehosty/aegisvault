@@ -93,7 +93,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
         {step === 0 && (
           <motion.div key="s0" {...stepAnim}>
             <p className="mb-4 text-[13px] text-fog">
-              Select the wallet whose backup you want to protect with AegisVault:
+              Select the wallet for which you want to request a backup safety review:
             </p>
             <div className="grid grid-cols-3 gap-2">
               {WALLET_TYPES.map((w) => (
@@ -207,9 +207,9 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
             <div className="flex items-start gap-3 rounded-2xl border border-line bg-white/[0.02] px-4 py-3.5">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-aegis" />
               <p className="text-xs leading-relaxed text-fog">
-                Protect your wallet backup with AegisVault to help guard against crypto scams,
-                fraudulent activity, and other crypto-related threats. Submit your public wallet
-                address for protection review to get started.
+                Request a review of your wallet backup setup and learn how to protect it from phishing,
+                wallet flashing scams and impersonation attempts. Submit only your public address.
+                Never enter your recovery phrase or private key on this site.
               </p>
             </div>
 
