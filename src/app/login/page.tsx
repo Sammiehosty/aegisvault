@@ -11,8 +11,8 @@ export default async function LoginPage() {
 
   return (
     <AuthShell
-      headline="Welcome back, guardian."
-      sub="Sign in to your secured dashboard. Sessions are encrypted, httpOnly and expire automatically."
+      headline="Welcome back. Stay scam-aware."
+      sub="Sign in to review your wallet protection requests and scam-safety resources."
     >
       <LoginForm />
     </AuthShell>
