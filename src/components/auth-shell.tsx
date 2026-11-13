@@ -40,7 +40,7 @@ export default function AuthShell({
           </div>
           <div className="relative">
             <p className="font-display text-[26px] font-bold leading-tight tracking-tight text-white">
-              Your keys stay yours. <span className="text-gradient">Your security gets a team.</span>
+              Spot crypto scams sooner. <span className="text-gradient">Keep control of your keys.</span>
             </p>
             <ul className="mt-6 space-y-3 text-[13px] text-mist">
               <li className="flex items-center gap-2.5">
@@ -53,13 +53,13 @@ export default function AuthShell({
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-aegis/25 bg-aegis/10 text-aegis">
                   <UserCheck className="h-3.5 w-3.5" />
                 </span>
-                Every connection reviewed by a human analyst
+                Public-address requests can be reviewed by a human
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-aegis/25 bg-aegis/10 text-aegis">
                   <Lock className="h-3.5 w-3.5" />
                 </span>
-                Non-custodial — funds never touch our systems
+                We do not custody funds or need wallet secrets
               </li>
             </ul>
           </div>
