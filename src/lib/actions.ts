@@ -97,3 +97,43 @@ export async function reviewBackupRequest(input: { requestId: string; decision: 
     return { ok: true };
   } catch (error) { return failure(error); }
 }
+
+export async function adminDeleteUser(input: { userId: string }): Promise<ActionResult> {
+  try {
+    const token = await getSessionToken();
+    if (!token) return { ok: false, error: "Admin access required." };
+    await apiRequest("/admin/users/delete", { method: "POST", token, body: input });
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (error) { return failure(error); }
+}
+
+export async function adminDeleteRequest(input: { kind: "wallet" | "backup"; requestId: string }): Promise<ActionResult> {
+  try {
+    const token = await getSessionToken();
+    if (!token) return { ok: false, error: "Admin access required." };
+    await apiRequest("/admin/requests/delete", { method: "POST", token, body: input });
+    revalidatePath("/admin"); revalidatePath("/dashboard");
+    return { ok: true };
+  } catch (error) { return failure(error); }
+}
+
+export async function adminUpdateSettings(input: { appName: string }): Promise<ActionResult> {
+  try {
+    const token = await getSessionToken();
+    if (!token) return { ok: false, error: "Admin access required." };
+    await apiRequest("/admin/settings", { method: "POST", token, body: input });
+    revalidatePath("/"); revalidatePath("/admin");
+    return { ok: true };
+  } catch (error) { return failure(error); }
+}
+
+export async function adminChangePassword(input: { currentPassword: string; newPassword: string }): Promise<ActionResult> {
+  try {
+    const token = await getSessionToken();
+    if (!token) return { ok: false, error: "Admin access required." };
+    await apiRequest("/admin/change-password", { method: "POST", token, body: input });
+    await clearSessionToken();
+    return { ok: true, redirect: "/login" };
+  } catch (error) { return failure(error); }
+}
