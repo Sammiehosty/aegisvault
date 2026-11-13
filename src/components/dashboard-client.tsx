@@ -117,7 +117,14 @@ export default function DashboardClient({
                   {label:"Backup verification",href:"#backup-verification"},
                   {label:"Activity history",href:"#activity-history"},
                   {label:"AegisVault home",href:"/"},
-                ].map((item) => <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
+                ].map((item) => <a key={item.href} href={item.label === "Activity history" ? undefined : item.href}
+                  onClick={(event) => {
+                    setMenuOpen(false);
+                    if (item.label === "Activity history") {
+                      event.preventDefault();
+                      setActivityOpen(true);
+                    }
+                  }}
                   className="block rounded-xl px-3.5 py-2.5 text-sm text-mist hover:bg-aegis/[0.08] hover:text-aegis">{item.label}</a>)}
                 <div className="my-1 border-t border-line" />
                 <button type="button" disabled={signingOut} onClick={() => startSignOut(async () => {
