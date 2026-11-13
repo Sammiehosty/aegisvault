@@ -93,27 +93,40 @@ try {
     respond(503, ['ok'=>false,'error'=>'Database connection unavailable']);
 }
 
-$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
-// Depending on cPanel/Apache PHP-FPM settings, SCRIPT_NAME may be either
-// /api/index.php or /index.php after the rewrite. Strip the script directory
-// when present, then remove the public /api mount prefix if it remains.
-if ($base !== '' && $base !== '/' && ($path === $base || str_starts_with($path, $base . '/'))) {
-    $path = substr($path, strlen($base));
+// Use the original request URL where available. Some cPanel rewrite/PHP-FPM
+// setups expose the rewritten script path separately from the requested route.
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if (!is_string($requestPath) || $requestPath === '') {
+    $requestPath = $_SERVER['REDIRECT_URL'] ?? $_SERVER['PATH_INFO'] ?? '/';
 }
-if ($path === '/api') {
-    $path = '/';
-} elseif (str_starts_with($path, '/api/')) {
-    $path = substr($path, 4);
-}
+$path = '/' . trim($requestPath, '/');
+
+// Remove the public API mount prefix, and tolerate requests routed through
+// /api/index.php or /index.php by Apache.
+$path = preg_replace('#^/api(?=/|$)#i', '', $path) ?? $path;
+$path = preg_replace('#^/index\\.php(?=/|$)#i', '', $path) ?? $path;
 $path = '/' . trim($path, '/');
+if ($path === '') $path = '/';
+
 $data = body();
 
 try {
     if ($method === 'GET' && $path === '/health') {
         $pdo->query('SELECT 1'); respond(200, ['ok'=>true,'service'=>'aegisvault-api']);
+    }
+
+    // Explicitly report wrong HTTP methods for public authentication routes.
+    // This prevents a GET request from falling through to the protected-route
+    // guard and being incorrectly reported as an expired session.
+    if ($path === '/auth/register' && $method !== 'POST') {
+        header('Allow: POST');
+        respond(405, ['ok'=>false,'error'=>'Method not allowed. Registration requires POST.']);
+    }
+    if ($path === '/auth/login' && $method !== 'POST') {
+        header('Allow: POST');
+        respond(405, ['ok'=>false,'error'=>'Method not allowed. Login requires POST.']);
     }
 
     if ($method === 'POST' && $path === '/auth/register') {
@@ -142,7 +155,18 @@ try {
         if ($user) { $h=authorizationHeader(); if(preg_match('/^Bearer\s+([a-f0-9]{64})$/i',$h,$m)){ $q=$pdo->prepare('DELETE FROM sessions WHERE token_hash=?');$q->execute([hash('sha256',$m[1])]); } }
         respond(200,['ok'=>true]);
     }
-    if (!$user) respond(401,['ok'=>false,'error'=>'Your session has expired. Please sign in again.']);
+    $protectedRoutes = [
+        'GET /dashboard',
+        'GET /admin',
+        'POST /auth/logout',
+        'POST /wallet-requests',
+        'POST /backup-requests',
+        'POST /wallet-requests/review',
+        'POST /backup-requests/review',
+    ];
+    if (in_array($method . ' ' . $path, $protectedRoutes, true) && !$user) {
+        respond(401,['ok'=>false,'error'=>'Your session has expired. Please sign in again.']);
+    }
 
     if ($method === 'GET' && $path === '/dashboard') {
         $wallets=rows($pdo,'SELECT * FROM wallet_requests WHERE user_id=? ORDER BY created_at DESC LIMIT 20',[$user['id']]);
