@@ -87,13 +87,29 @@ function uuid(): string {
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($b), 4));
 }
 function walletChain(string $address): ?string {
+    if ($address === '') return null;
     if (preg_match('/^0x[a-fA-F0-9]{40}$/', $address)) return 'EVM';
     if (preg_match('/^(1[a-km-zA-HJ-NP-Z1-9]{25,34}|3[a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{11,71})$/', $address)) return 'Bitcoin';
     if (preg_match('/^[1-9A-HJ-NP-Za-km-z]{32,44}$/', $address)) return 'Solana';
-    return null;
+    return 'Other';
 }
 function walletTypes(): array {
-    return ['metamask'=>'MetaMask','coinbase'=>'Coinbase Wallet','trust'=>'Trust Wallet','ledger'=>'Ledger','trezor'=>'Trezor','phantom'=>'Phantom','exodus'=>'Exodus','rainbow'=>'Rainbow'];
+    return [
+        'metamask'=>'MetaMask',
+        'coinbase'=>'Coinbase Wallet',
+        'trust'=>'Trust Wallet',
+        'ledger'=>'Ledger',
+        'trezor'=>'Trezor',
+        'phantom'=>'Phantom',
+        'exodus'=>'Exodus',
+        'rainbow'=>'Rainbow',
+        'binance_web3'=>'Binance Web3 Wallet',
+        'okx'=>'OKX Wallet',
+        'rabby'=>'Rabby Wallet',
+        'safepal'=>'SafePal',
+        'uniswap'=>'Uniswap Wallet',
+        'zerion'=>'Zerion',
+    ];
 }
 function rows(PDO $pdo, string $sql, array $params=[]): array {
     $q=$pdo->prepare($sql); $q->execute($params); return $q->fetchAll(PDO::FETCH_ASSOC);
@@ -248,7 +264,7 @@ try {
     if ($method === 'POST' && $path === '/wallet-requests') {
         $types=walletTypes();$type=cleanString($data['walletType']??'',80);$address=cleanString($data['address']??'',255);$chain=walletChain($address);
         if(!isset($types[$type])) respond(422,['ok'=>false,'error'=>'Please choose a supported wallet type.']);
-        if(!$chain) respond(422,['ok'=>false,'error'=>"That doesn't look like a valid public wallet address (EVM 0x…, Bitcoin, or Solana base58)."]);
+        if(!$chain) respond(422,['ok'=>false,'error'=>'Please enter a public wallet address.']);
         $q=$pdo->prepare("SELECT id FROM wallet_requests WHERE user_id=? AND address=? AND status<>'rejected' LIMIT 1");$q->execute([$user['id'],$address]);if($q->fetch())respond(409,['ok'=>false,'error'=>'This address already has a protection request on your account.']);
         $q=$pdo->prepare("INSERT INTO wallet_requests (id,user_id,wallet_type,label,address,chain,status,created_at) VALUES (?,?,?,?,?,?, 'pending',UTC_TIMESTAMP())");$q->execute([uuid(),$user['id'],$type,cleanString($data['label']??'',60) ?: null,$address,$chain]);
         logEvent($pdo,$user['id'],'wallet',$types[$type].' protection request submitted ('.substr($address,0,6).'…'.substr($address,-4).') · pending compliance review',true);respond(201,['ok'=>true]);
