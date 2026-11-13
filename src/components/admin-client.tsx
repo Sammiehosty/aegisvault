@@ -19,11 +19,15 @@ import {
   ShieldX,
   UserRound,
   Users,
+  Trash2,
+  Settings,
+  KeyRound,
+  Save,
   Wallet,
   X,
 } from "lucide-react";
 import { Button, Card, Modal, StatusBadge, Textarea, cx } from "@/components/ui";
-import { logoutAction, reviewBackupRequest, reviewWalletRequest } from "@/lib/actions";
+import { logoutAction, reviewBackupRequest, reviewWalletRequest, adminDeleteUser, adminDeleteRequest, adminUpdateSettings, adminChangePassword } from "@/lib/actions";
 import { BACKUP_CHECKLIST, BACKUP_METHODS, getWalletType, shortAddress } from "@/lib/wallets";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -59,21 +63,26 @@ type ReviewTarget =
 
 export default function AdminClient({
   admin,
+  appName,
   users,
   walletRows,
   backupRows,
   activity,
 }: {
   admin: { fullName: string; email: string };
+  appName: string;
   users: User[];
   walletRows: WalletRow[];
   backupRows: BackupRow[];
   activity: ActivityRow[];
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"queue" | "wallets" | "backups" | "users" | "activity">("queue");
+  const [tab, setTab] = useState<"queue" | "wallets" | "backups" | "users" | "activity" | "settings">("queue");
   const [target, setTarget] = useState<ReviewTarget | null>(null);
   const [note, setNote] = useState("");
+  const [appNameInput, setAppNameInput] = useState(appName);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [pending, start] = useTransition();
   const [signingOut, startSignOut] = useTransition();
 
@@ -112,12 +121,27 @@ export default function AdminClient({
     });
   }
 
+  function removeRequest(kind: "wallet" | "backup", requestId: string) {
+    if (!window.confirm("Permanently delete this request? This cannot be undone.")) return;
+    start(async () => { const res = await adminDeleteRequest({ kind, requestId }); if (!res.ok) { toast.error(res.error); return; } toast.success("Request deleted."); router.refresh(); });
+  }
+  function removeUser(user: User) {
+    if (!window.confirm("Delete " + user.email + "? Their wallets, backups and activity will also be deleted.")) return;
+    start(async () => { const res = await adminDeleteUser({ userId: user.id }); if (!res.ok) { toast.error(res.error); return; } toast.success("User and associated records deleted."); router.refresh(); });
+  }
+  function saveAppName() {
+    start(async () => { const res = await adminUpdateSettings({ appName: appNameInput.trim() }); if (!res.ok) { toast.error(res.error); return; } toast.success("Application name updated."); router.refresh(); });
+  }
+  function changePassword() {
+    start(async () => { const res = await adminChangePassword({ currentPassword, newPassword }); if (!res.ok) { toast.error(res.error); return; } toast.success("Password changed. Please sign in again."); router.push("/login"); router.refresh(); });
+  }
   const TABS = [
     { id: "queue" as const, label: "Review queue", icon: FileClock, count: pendingTotal },
     { id: "wallets" as const, label: "Wallet requests", icon: Wallet, count: walletRows.length },
     { id: "backups" as const, label: "Backup requests", icon: HardDrive, count: backupRows.length },
     { id: "users" as const, label: "Users", icon: Users, count: users.length },
     { id: "activity" as const, label: "Activity", icon: ActivityIcon, count: activity.length },
+    { id: "settings" as const, label: "Settings", icon: Settings, count: 0 },
   ];
 
   return (
@@ -133,7 +157,7 @@ export default function AdminClient({
               <ShieldCheck className="h-4.5 w-4.5 text-[#04120c]" strokeWidth={2.4} />
             </span>
             <span className="font-display text-base font-bold tracking-tight text-white">
-              Aegis<span className="text-aegis">Vault</span>
+              {appName}
             </span>
             <span className="ml-1 rounded-full border border-glow/30 bg-glow/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-glow">
               Admin console
@@ -211,14 +235,14 @@ export default function AdminClient({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.14, ease }}
-          className="mt-8 flex flex-wrap gap-2"
+          className="mt-8 flex gap-2 overflow-x-auto pb-2"
         >
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cx(
-                "inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-[13px] font-semibold transition-all duration-300",
+                "inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 sm:px-4 py-2.5 text-[13px] font-semibold transition-all duration-300",
                 tab === t.id
                   ? "border-aegis/50 bg-aegis/[0.1] text-white"
                   : "border-line bg-white/[0.02] text-fog hover:border-aegis/25 hover:text-white",
@@ -259,7 +283,7 @@ export default function AdminClient({
                 Public addresses only — reviewers never see keys or phrases; they verify format,
                 chain and fraud-dataset screening results.
               </p>
-              <WalletTable rows={tab === "queue" ? pendingWallets : walletRows} onReview={(row) => setTarget({ kind: "wallet", row })} />
+              <WalletTable rows={tab === "queue" ? pendingWallets : walletRows} onReview={(row) => setTarget({ kind: "wallet", row })} onDelete={(row) => removeRequest("wallet", row.id)} />
             </Card>
           )}
 
@@ -272,7 +296,7 @@ export default function AdminClient({
               <p className="mb-5 text-[12.5px] text-fog">
                 Attestation checklists submitted by users — approve when hygiene practices are complete.
               </p>
-              <BackupTable rows={tab === "queue" ? pendingBackups : backupRows} onReview={(row) => setTarget({ kind: "backup", row })} />
+              <BackupTable rows={tab === "queue" ? pendingBackups : backupRows} onReview={(row) => setTarget({ kind: "backup", row })} onDelete={(row) => removeRequest("backup", row.id)} />
             </Card>
           )}
 
@@ -289,7 +313,7 @@ export default function AdminClient({
                       <th className="pb-3 pr-4 font-semibold">Role</th>
                       <th className="pb-3 pr-4 font-semibold">Wallets</th>
                       <th className="pb-3 pr-4 font-semibold">Backups</th>
-                      <th className="pb-3 font-semibold">Joined</th>
+                      <th className="pb-3 font-semibold">Joined</th><th className="pb-3 font-semibold">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -315,7 +339,7 @@ export default function AdminClient({
                         <td className="py-3.5 pr-4 text-mist">
                           {backupRows.filter((b) => b.userId === u.id).length}
                         </td>
-                        <td className="py-3.5 text-fog">{fmtDate(u.createdAt)}</td>
+                        <td className="py-3.5 text-fog">{fmtDate(u.createdAt)}</td><td className="py-3.5"><Button variant="danger" onClick={() => removeUser(u)}><Trash2 className="h-4 w-4" /> Delete</Button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -324,6 +348,27 @@ export default function AdminClient({
             </Card>
           )}
 
+          {tab === "settings" && (
+            <div className="grid gap-5 lg:grid-cols-2">
+              <Card className="p-4 sm:p-6 lg:p-7">
+                <h2 className="mb-2 flex items-center gap-2 font-display text-lg font-semibold text-white"><Settings className="h-5 w-5 text-aegis" /> Application settings</h2>
+                <p className="mb-5 text-sm text-fog">Change the name displayed in the admin console.</p>
+                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); saveAppName(); }}>
+                  <label className="block text-sm text-mist">Application name<input value={appNameInput} onChange={(e) => setAppNameInput(e.target.value)} maxLength={80} required className="mt-2 w-full rounded-xl border border-line bg-white/[0.04] px-4 py-3 text-white outline-none focus:border-aegis" /></label>
+                  <Button type="submit" loading={pending}><Save className="h-4 w-4" /> Save app name</Button>
+                </form>
+              </Card>
+              <Card className="p-4 sm:p-6 lg:p-7">
+                <h2 className="mb-2 flex items-center gap-2 font-display text-lg font-semibold text-white"><KeyRound className="h-5 w-5 text-aegis" /> Change password</h2>
+                <p className="mb-5 text-sm text-fog">Enter your current password. You will be signed out after the change.</p>
+                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); changePassword(); }}>
+                  <label className="block text-sm text-mist">Current password<input type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required className="mt-2 w-full rounded-xl border border-line bg-white/[0.04] px-4 py-3 text-white outline-none focus:border-aegis" /></label>
+                  <label className="block text-sm text-mist">New password (minimum 10 characters)<input type="password" autoComplete="new-password" minLength={10} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required className="mt-2 w-full rounded-xl border border-line bg-white/[0.04] px-4 py-3 text-white outline-none focus:border-aegis" /></label>
+                  <Button type="submit" loading={pending}><KeyRound className="h-4 w-4" /> Update password</Button>
+                </form>
+              </Card>
+            </div>
+          )}
           {tab === "activity" && (
             <Card className="p-6 sm:p-7">
               <h2 className="mb-5 flex items-center gap-2.5 font-display text-lg font-semibold text-white">
@@ -463,7 +508,7 @@ export default function AdminClient({
 
 /* --------------------------------- tables ---------------------------------- */
 
-function WalletTable({ rows, onReview }: { rows: WalletRow[]; onReview: (r: WalletRow) => void }) {
+function WalletTable({ rows, onReview, onDelete }: { rows: WalletRow[]; onReview: (r: WalletRow) => void; onDelete: (r: WalletRow) => void }) {
   if (rows.length === 0)
     return (
       <div className="rounded-2xl border border-dashed border-line-strong px-6 py-10 text-center text-sm text-fog">
@@ -508,6 +553,7 @@ function WalletTable({ rows, onReview }: { rows: WalletRow[]; onReview: (r: Wall
                   <Clock className="h-3 w-3" /> {r.reviewedAt ? fmtDate(r.reviewedAt) : fmtDate(r.createdAt)}
                 </span>
               )}
+              <Button variant="danger" onClick={() => onDelete(r)}><Trash2 className="h-4 w-4" /><span className="hidden sm:inline">Delete</span></Button>
             </div>
           </div>
         );
@@ -516,7 +562,7 @@ function WalletTable({ rows, onReview }: { rows: WalletRow[]; onReview: (r: Wall
   );
 }
 
-function BackupTable({ rows, onReview }: { rows: BackupRow[]; onReview: (r: BackupRow) => void }) {
+function BackupTable({ rows, onReview, onDelete }: { rows: BackupRow[]; onReview: (r: BackupRow) => void; onDelete: (r: BackupRow) => void }) {
   if (rows.length === 0)
     return (
       <div className="rounded-2xl border border-dashed border-line-strong px-6 py-10 text-center text-sm text-fog">
@@ -556,6 +602,7 @@ function BackupTable({ rows, onReview }: { rows: BackupRow[]; onReview: (r: Back
                   <Clock className="h-3 w-3" /> {r.reviewedAt ? fmtDate(r.reviewedAt) : fmtDate(r.createdAt)}
                 </span>
               )}
+              <Button variant="danger" onClick={() => onDelete(r)}><Trash2 className="h-4 w-4" /><span className="hidden sm:inline">Delete</span></Button>
             </div>
           </div>
         );
