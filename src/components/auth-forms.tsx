@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
-import { loginAction, registerAction } from "@/lib/actions";
+import { establishSessionAction, loginAction } from "@/lib/actions";
 import { Button, Field, Input } from "@/components/ui";
 
 function PasswordField({ label, value, onChange, placeholder }: {
@@ -112,7 +112,28 @@ export function RegisterForm() {
         }
         start(async () => {
           try {
-            const res = await registerAction({ fullName, email, password });
+            const response = await fetch("https://pinetnow.com/api/auth/register", {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              cache: "no-store",
+              body: JSON.stringify({ fullName, email, password }),
+            });
+            const result = await response.json().catch(() => ({})) as {
+              ok?: boolean;
+              token?: string;
+              error?: string;
+            };
+            if (!response.ok || result.ok !== true || !result.token) {
+              toast.error(result.error || ("Registration failed (HTTP " + response.status + ")."));
+              return;
+            }
+
+            // Signup data goes directly to PHP. This action verifies the token
+            // and stores it in the existing HttpOnly session cookie.
+            const res = await establishSessionAction(result.token);
             if (!res.ok) {
               toast.error(res.error);
               return;
