@@ -1,54 +1,28 @@
 # AegisVault PHP API (PHP 8.2+)
 
-The Next.js/Vercel application now uses this API for all database-backed operations. MySQL credentials stay on the PHP host; Vercel never connects to MySQL directly.
+This API connects the Next.js website to the MySQL database. Database credentials remain on the PHP host.
 
-## 1. Upload the API
+## 1. Upload and configure
 
-1. Create a folder on your PHP hosting account, for example `public_html/aegis-api/`.
-2. Upload the contents of this `php-api` folder into it (`index.php`, `.htaccess`, `config.example.php`).
-3. Copy `config.example.php` to `config.php` using your hosting File Manager.
-4. Edit `config.php` with the MySQL host, database name, database username and password.
-5. Set `server_secret` to a long random string (at least 32 characters). Use the exact same string for `AEGIS_API_SECRET` in Vercel.
-6. Ensure PHP 8.2+, PDO MySQL (`pdo_mysql`) and mbstring are enabled. Enable HTTPS for the API domain.
-
-The API folder must be reachable at an HTTPS URL such as `https://api.example.com/aegis-api` or `https://example.com/aegis-api`.
+1. Upload the contents of this folder to the API directory configured for your domain.
+2. Copy `config.example.php` to `config.php`.
+3. Edit `config.php` with your cPanel MySQL host, database name, username and password.
+4. Enable PHP 8.2+, PDO MySQL (`pdo_mysql`) and mbstring.
+5. Enable HTTPS on the API domain before using real accounts.
 
 ## 2. Prepare MySQL
 
-Create an empty MySQL database and import the existing project file `database/schema.mysql.sql`. This creates `users`, `sessions`, `wallet_requests`, `backup_requests`, and `activity_events`.
+Import `database/schema.mysql.sql` from the repository into an empty database. It creates the users, sessions, wallet requests, backup requests and activity events tables.
 
-## 3. Configure Vercel
+## 3. API address
 
-In Vercel → Project → Settings → Environment Variables, add:
+The website currently uses the API address embedded in `src/lib/api.ts`: `http://pinetnow.com/api`. No API URL or shared API secret environment variables are required in Vercel.
 
-- `AEGIS_API_URL` = the API base URL, with no trailing slash, e.g. `https://api.example.com/aegis-api`
-- `AEGIS_API_SECRET` = the same long random value configured as `server_secret` in PHP `config.php`
+## 4. Authentication and security
 
-Apply to Production and Preview as needed, save, then redeploy. Do not set `DATABASE_URL` in Vercel; the frontend no longer uses a direct database connection.
-
-## 4. Test the API
-
-The health endpoint is protected by the server key. Test it from a trusted terminal (not a browser):
-
-```bash
-curl -H 'X-Aegis-Server-Key: YOUR_LONG_SECRET' https://api.example.com/aegis-api/health
-```
-
-Expected response:
-
-```json
-{"ok":true,"service":"aegisvault-api"}
-```
-
-## Security notes
-
-- The PHP API requires the shared server secret on every request. Keep it private and never prefix it with `NEXT_PUBLIC_`.
-- Browser CORS is intentionally not enabled; only the Next.js server should call this API.
-- User sessions are random 256-bit tokens; only SHA-256 token hashes are stored in MySQL. The browser receives the token only in a Secure, HttpOnly, SameSite=Lax cookie set by Next.js.
+- Registration and login create expiring bearer session tokens. Only SHA-256 token hashes are stored in MySQL.
+- Authenticated user routes require a valid session token; administrative routes also check the user's admin role.
+- Keep `config.php` private and never commit database credentials.
+- Use HTTPS. The currently configured HTTP URL does not encrypt traffic and should be changed to HTTPS as soon as SSL is enabled.
 - Passwords are hashed with PHP `password_hash()` and verified using `password_verify()`.
-- API errors do not expose SQL errors or stack traces; details are written to the PHP error log.
-- AegisVault must never collect wallet seed phrases, private keys or signing secrets. Only public addresses and backup-practice attestations are accepted.
-
-## Existing database compatibility
-
-No new application tables are required. The API uses the five tables already defined in `database/schema.mysql.sql`.
+- Never collect wallet seed phrases, private keys or signing secrets. Only public wallet addresses and backup-practice attestations are accepted.
