@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Wallet,
 } from "lucide-react";
-import { Modal, Button, Field, Input, cx } from "@/components/ui";
+import { Modal, Button, Field, Textarea, cx } from "@/components/ui";
 import { WALLET_TYPES, detectChain, getWalletType, shortAddress, type WalletType } from "@/lib/wallets";
 import { submitWalletRequest } from "@/lib/actions";
 
@@ -30,7 +30,6 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
   const [step, setStep] = useState(0);
   const [wallet, setWallet] = useState<WalletType | null>(null);
   const [address, setAddress] = useState("");
-  const [label, setLabel] = useState("");
   const [pending, start] = useTransition();
 
   const chain = detectChain(address.trim());
@@ -39,14 +38,13 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
     setStep(0);
     setWallet(null);
     setAddress("");
-    setLabel("");
   }
 
   function submit() {
     if (!wallet) return;
     start(async () => {
       try {
-        const res = await submitWalletRequest({ walletType: wallet.id, address, label });
+        const res = await submitWalletRequest({ walletType: wallet.id, address });
         if (!res.ok) {
           toast.error(res.error);
           return;
@@ -152,12 +150,14 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
               label="Public wallet address"
               hint="The receiving address only — starts with 0x… (EVM), bc1…/1…/3… (Bitcoin) or a Solana base58 string."
             >
-              <Input
+              <Textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-                className="mono text-[13px]"
+                placeholder="Paste your public wallet address here"
+                className="mono min-h-28 resize-y break-all text-[13px]"
+                rows={4}
                 autoFocus
+                spellCheck={false}
               />
             </Field>
 
@@ -181,15 +181,6 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
                 )}
               </div>
             )}
-
-            <Field label="Label (optional)" hint="A friendly name, e.g. “Trading wallet” or “Cold storage”.">
-              <Input
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="Main wallet"
-                maxLength={60}
-              />
-            </Field>
 
             <div className="flex items-start gap-3 rounded-2xl border border-amber-warn/25 bg-amber-warn/[0.06] px-4 py-3">
               <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-warn" />
@@ -233,12 +224,6 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
                   <dt className="text-fog">Address</dt>
                   <dd className="mono text-[13px] font-semibold text-aegis">{shortAddress(address.trim())}</dd>
                 </div>
-                {label && (
-                  <div className="flex items-center justify-between gap-4">
-                    <dt className="text-fog">Label</dt>
-                    <dd className="font-semibold text-white">{label}</dd>
-                  </div>
-                )}
               </dl>
             </div>
 
