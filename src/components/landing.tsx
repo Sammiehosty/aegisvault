@@ -140,7 +140,7 @@ function Hero() {
             <span className="flex items-center gap-1 rounded-full bg-aegis px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#04120c]">
               <Sparkles className="h-3 w-3" /> New
             </span>
-            Human-reviewed wallet protection is live
+            Crypto scam awareness & wallet security
           </motion.div>
 
           <motion.h1
@@ -149,9 +149,9 @@ function Hero() {
             transition={{ duration: 0.85, delay: 0.08, ease }}
             className="mt-6 font-display text-[44px] font-bold leading-[1.02] tracking-[-0.03em] text-white sm:text-6xl lg:text-[68px]"
           >
-            Secure your crypto.
+            Stay ahead of crypto scams.
             <br />
-            <span className="text-gradient">Outsmart the scammers.</span>
+            <span className="text-gradient">Protect what matters.</span>
           </motion.h1>
 
           <motion.p
@@ -194,7 +194,7 @@ function Hero() {
             transition={{ duration: 1, delay: 0.4 }}
             className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-fog"
           >
-            {["Zero custody", "Public addresses only", "Median review under 24h", "Seed phrases never collected"].map(
+            {["Zero custody", "Public addresses only", "Human-reviewed requests", "Seed phrases never collected"].map(
               (t) => (
                 <span key={t} className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-aegis" />
@@ -252,8 +252,8 @@ function Hero() {
                 <ShieldX className="h-4 w-4" />
               </span>
               <div>
-                <p className="text-[11px] font-semibold text-white">Flash-balance scam flagged</p>
-                <p className="text-[10px] text-fog">Fake USDT credit · blocked</p>
+                <p className="text-[11px] font-semibold text-white">Wallet flashing warning</p>
+                <p className="text-[10px] text-fog">A displayed balance can be fake</p>
               </div>
             </motion.div>
 
@@ -268,8 +268,8 @@ function Hero() {
                 <Lock className="h-4 w-4" />
               </span>
               <div>
-                <p className="text-[11px] font-semibold text-white">Backup verified</p>
-                <p className="text-[10px] text-fog">Steel plate · 2 locations · 6/6</p>
+                <p className="text-[11px] font-semibold text-white">Keep recovery backups offline</p>
+                <p className="text-[10px] text-fog">Never share recovery words</p>
               </div>
             </motion.div>
           </div>
@@ -310,10 +310,10 @@ function Hero() {
 /* --------------------------------- stats ----------------------------------- */
 
 const STATS: Array<[string, string, ReactNode]> = [
-  ["38,400+", "wallets under protection review", <Wallet key="i" className="h-4 w-4" />],
-  ["$214M", "in scam attempts flagged & blocked", <Ban key="i" className="h-4 w-4" />],
-  ["< 24 hrs", "median human compliance review", <UserCheck key="i" className="h-4 w-4" />],
-  ["0", "seed phrases requested — ever", <EyeOff key="i" className="h-4 w-4" />],
+  ["Never", "share your recovery phrase with anyone", <EyeOff key="i" className="h-4 w-4" />],
+  ["Verify", "token balances on the correct blockchain", <Coins key="i" className="h-4 w-4" />],
+  ["Review", "wallet permissions before signing", <ShieldCheck key="i" className="h-4 w-4" />],
+  ["Pause", "when a stranger pressures you to act", <AlertTriangle key="i" className="h-4 w-4" />],
 ];
 
 function Stats() {
@@ -342,32 +342,32 @@ const THREATS = [
   {
     icon: FileWarning,
     title: "Fake “wallet validation” sites",
-    body: "Cloned security portals claim your wallet must be “synchronized” or “validated” and ask you to type your 12/24-word recovery phrase. The moment you do, the wallet is drained. AegisVault screens payment addresses before you ever send funds.",
+    body: "Cloned security portals claim your wallet must be “synchronized” or “validated” and ask for your 12/24-word recovery phrase. Never enter those words into a website or share them with support. AegisVault explains the warning signs and safe steps to take.",
   },
   {
     icon: Coins,
     title: "Flash USDT & balance spoofing",
-    body: "“Wallet flashing” tools display fake balances or testnet tokens that look spendable — until the victim pays a “release fee”. Learn how to confirm real on-chain balances and never pay to unlock phantom funds.",
+    body: "Wallet flashing scams use fake or temporary-looking token balances, edited screenshots, spoofed apps or tokens with no real value to make you believe money has arrived. Check the transaction on the correct block explorer and never pay a release, activation or withdrawal fee to unlock a flashed balance.",
   },
   {
     icon: KeyRound,
     title: "Seed-phrase harvesting",
-    body: "Fake support agents, airdrop forms and browser popups beg for your recovery words. There is no legitimate reason — none — to type them into a website. Our checklist training makes this reflex automatic.",
+    body: "Fake support agents, airdrop forms and browser popups ask for your recovery words. No legitimate support team needs your seed phrase or private key. Keep them offline and reject every request to disclose them.",
   },
   {
     icon: Gift,
     title: "Giveaway & doubling scams",
-    body: "“Send 1 BTC, receive 2 back” livestreams and celebrity deepfakes. Our payment-screening references known scam-address datasets before you commit funds.",
+    body: "Fake giveaways, celebrity deepfakes and doubling promises pressure you to send crypto first. Treat guaranteed returns and urgent giveaways as red flags; transfers are usually irreversible.",
   },
   {
     icon: Copy,
     title: "Address poisoning",
-    body: "Scammers seed your history with lookalike addresses matching the first and last characters of addresses you use. Always verify the full string — we teach a 6-second verification habit.",
+    body: "Scammers place tiny transactions from lookalike addresses into your history, hoping you copy the wrong one later. Verify the full destination address against a trusted original source every time.",
   },
   {
     icon: Bug,
     title: "Drainer approvals & honeypots",
-    body: "One malicious “Sign” can grant unlimited token allowances. We walk you through reviewing and revoking stale approvals, and spotting tokens that can be bought but never sold.",
+    body: "A malicious approval or signature can grant a contract permission to move tokens. Read wallet prompts carefully, avoid unknown dApps and review token allowances with trusted tools before approving.",
   },
 ];
 
@@ -383,9 +383,7 @@ function Threats() {
             Know the scam before <span className="text-gradient">it knows you.</span>
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-fog">
-            Most crypto losses are not hacks — they are conversations. AegisVault trains you to
-            recognise the six attack patterns behind nearly every drained wallet, then adds a
-            human-reviewed protection layer on top.
+            Scams often begin with a convincing message, fake website, token display or approval request. Learn how common attacks work, what to check before signing or sending, and how AegisVault's public-address review process works.
           </p>
         </div>
       </Reveal>
@@ -414,19 +412,19 @@ const STEPS = [
     icon: UserCheck,
     step: "01",
     title: "Create your secure account",
-    body: "Register in under a minute. Your dashboard tracks a live Security Score across wallet protection, backup health and scam-awareness training.",
+    body: "Create an account to organise your wallet protection requests and review status. Your setup progress reflects the account, wallet and backup steps you have completed — it is not a guarantee that a wallet is safe.",
   },
   {
     icon: Wallet,
     step: "02",
     title: "Connect a wallet — safely",
-    body: "Choose your wallet type and submit only your PUBLIC address — the same string you’d share to receive a payment. It is screened against fraud datasets and queued for review. We never request seed phrases, keys or signatures that move funds.",
+    body: "Choose your wallet type and submit only its PUBLIC address. A reviewer can assess the submitted request; submitting an address does not connect to your wallet, inspect transactions or automatically block scams. We never request seed phrases, private keys or transaction-authorising signatures.",
   },
   {
     icon: ClipboardCheck,
     step: "03",
     title: "Human compliance review",
-    body: "Every connection and backup verification goes from Pending to Connected only after a trained reviewer approves it. You watch the status change in real time from your dashboard.",
+    body: "Your request appears as Pending while it awaits review. The dashboard shows the review decision when it is recorded. Approval means the request was reviewed; it does not mean AegisVault can control, monitor or guarantee the safety of your wallet.",
   },
 ];
 
@@ -476,7 +474,7 @@ const RULES = [
   "Keep significant holdings on a hardware wallet, not a hot wallet.",
   "Test every new receiving flow with a small amount first.",
   "Review and revoke stale token approvals monthly.",
-  "“Flash” or “pending release” balances that require a fee to unlock are always fake.",
+  "Treat flashed, unconfirmed or suspicious balances as untrusted until independently verified on the correct blockchain.",
 ];
 
 const NEVER = [
@@ -496,12 +494,10 @@ function GoldenRules() {
               <AlertTriangle className="h-3.5 w-3.5" /> Golden rules
             </p>
             <h2 className="font-display text-4xl font-bold tracking-[-0.02em] text-white sm:text-5xl">
-              Eight habits that stop <span className="text-gradient">99% of losses.</span>
+              Eight habits that help reduce <span className="text-gradient">your scam risk.</span>
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-fog">
-              Scams succeed by rushing you past your own safeguards. Print these, pin them, and
-              make them muscle memory. Your Security Score grows as you complete each practice in
-              the dashboard.
+              Scammers rely on urgency, confusion and misplaced trust. Use these checks before connecting a wallet, approving a signature or sending funds. No checklist can eliminate every risk, but slowing down can help you avoid common traps.
             </p>
 
             <div className="mt-8 rounded-2xl border border-danger/25 bg-danger/[0.06] p-6">
@@ -548,17 +544,17 @@ function ReviewExplainer() {
     {
       icon: Globe,
       title: "Dataset screening",
-      body: "Submitted public addresses are screened against known fraud, phishing and mixer-flag datasets.",
+      body: "Your public wallet address is included with your request so a reviewer can identify the wallet and network you submitted. This site does not currently perform live blockchain threat scanning.",
     },
     {
       icon: UserCheck,
       title: "Human reviewer",
-      body: "A trained compliance reviewer confirms format, chain and screening results before approving.",
+      body: "A reviewer checks the submitted request details. Approval is a review status, not a security certification or guarantee.",
     },
     {
       icon: Smartphone,
       title: "Live status updates",
-      body: "Pending → Connected (or Protected) the moment review completes — visible instantly in your dashboard.",
+      body: "Your dashboard displays Pending, Connected or Protected request statuses after a review decision is recorded.",
     },
   ];
   return (
@@ -573,9 +569,7 @@ function ReviewExplainer() {
               Automation flags. <span className="text-gradient">Humans decide.</span>
             </h2>
             <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-fog">
-              Every wallet connection and backup verification enters a review queue staffed by our
-              compliance team. Nothing is auto-approved — that friction is the feature. It keeps
-              poisoned addresses and sloppy backups out of your security perimeter.
+              Wallet and backup requests are submitted for human review and their status is shown in your dashboard. A review does not scan live transactions, revoke malicious permissions or stop a transfer. Keep using your wallet's own security controls and verify every transaction yourself.
             </p>
             <div className="mt-8 space-y-5">
               {items.map((it) => (
@@ -596,7 +590,7 @@ function ReviewExplainer() {
             <div className="glass noise relative overflow-hidden rounded-3xl p-7">
               <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-aegis/10 blur-3xl" />
               <p className="mb-5 font-display text-xs font-bold uppercase tracking-[0.18em] text-fog">
-                Review queue · live
+                Example review statuses
               </p>
               <div className="space-y-3">
                 {[
@@ -625,7 +619,7 @@ function ReviewExplainer() {
               </div>
               <p className="mt-5 flex items-center gap-2 text-xs text-fog">
                 <Lock className="h-3.5 w-3.5 text-aegis" />
-                Reviewers see public addresses and checklist attestations only — never secrets.
+                Illustrative examples only. Never submit recovery phrases, private keys or signing requests.
               </p>
             </div>
           </Reveal>
@@ -649,8 +643,7 @@ function Cta() {
             Your keys stay yours. <span className="text-gradient">Your security gets a team.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-fog">
-            Create your account, connect your first wallet and verify your backup — all before
-            lunch. The scammers are already working. So are we.
+            Build safer habits before your next crypto transaction. Learn the warning signs of wallet flashing, fake balances, phishing, malicious approvals and impersonation scams.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -683,9 +676,7 @@ function Footer() {
           <div className="max-w-sm">
             <Logo />
             <p className="mt-4 text-[13px] leading-relaxed text-fog">
-              Human-reviewed wallet protection and scam-prevention training. Non-custodial by
-              design: we store public addresses and security attestations — never keys, phrases,
-              or secrets.
+              Crypto scam awareness and wallet security guidance, with a human-reviewed public-address request workflow. AegisVault does not hold your crypto or need your recovery phrase, private keys or wallet passwords.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-10 text-[13px] sm:grid-cols-3">
@@ -716,7 +707,7 @@ function Footer() {
           </div>
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-line/60 pt-6 text-xs text-fog/70 sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} AegisVault Security Labs. Education and screening — not financial advice.</p>
+          <p>© {new Date().getFullYear()} AegisVault Security Labs. Education and request review only — not live transaction monitoring, custody or financial advice.</p>
           <p className="flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5 text-aegis" />
             If a site asks for your recovery phrase, it is a scam. Full stop.
