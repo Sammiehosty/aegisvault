@@ -294,7 +294,7 @@ try {
         $q=$pdo->prepare("SELECT * FROM {$table} WHERE id=? LIMIT 1");$q->execute([$id]);$req=$q->fetch();if(!$req)respond(404,['ok'=>false,'error'=>'Request not found.']);if($req['status']!=='pending')respond(409,['ok'=>false,'error'=>'This request was already reviewed.']);
         $q=$pdo->prepare("UPDATE {$table} SET status=?,review_note=?,reviewed_by=?,reviewed_at=UTC_TIMESTAMP() WHERE id=? AND status='pending'");$q->execute([$decision,$note,$user['id'],$id]);
         if($isWallet)$message=$decision==='approved'?'Wallet protection approved — '.$req['wallet_type'].' address is now Connected & monitored':'Wallet protection request declined'.($note?': '.$note:'.');
-        else $message=$decision==='approved'?'Backup health verified — recovery plan marked as Protected':'Backup verification declined'.($note?': '.$note:'.');
+        else $message=$decision==='approved'?'Backup wallet protection approved — '.$req['wallet_type'].' address is now Protected':'Backup wallet protection request declined'.($note?': '.$note:'.');
         logEvent($pdo,$req['user_id'],$isWallet?'wallet':'backup',$message,true);respond(200,['ok'=>true]);
     }
 
