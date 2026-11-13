@@ -53,3 +53,12 @@ The API can send a Telegram message to the configured admin chat whenever a user
 7. Telegram should return `"ok":true`. Submit a test wallet or backup request from a normal user account. The admin chat should receive a message with Approve and Reject buttons.
 
 **Security notes:** Keep `config.php` out of GitHub and never share the bot token publicly. Approval buttons are restricted to the configured Telegram user and chat. Telegram approval uses the configured AegisVault admin account for the audit record. Notifications are best-effort: a Telegram outage will not prevent the user's request from being saved in AegisVault. Only public wallet addresses are included; never request or send seed phrases, private keys or wallet passwords.
+
+
+## Admin management features
+
+Run `database/migrations/2026_11_13_admin_management.sql` once in phpMyAdmin before using the updated admin console. It creates the `app_settings` table used to store the application name.
+
+The admin console now supports deleting regular user accounts (their wallet requests, backup requests, sessions and activity are removed through the database foreign-key cascades), deleting wallet/backup requests in any status, changing the displayed application name, and changing the admin password. Password changes require the current password and revoke all active sessions, so sign in again afterward.
+
+Telegram request notifications include a **Delete request** button. It deletes the matching wallet or backup request even if it has already been approved or rejected. The Telegram callback remains restricted to the configured Telegram account and configured AegisVault administrator.
