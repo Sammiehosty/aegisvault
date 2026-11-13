@@ -4,6 +4,24 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
+// Allow the deployed AegisVault frontend to call the API directly from the browser.
+$allowedOrigins = ['https://aegisvaultx.vercel.app'];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin !== '' && in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, Accept');
+}
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+    if ($origin === '' || !in_array($origin, $allowedOrigins, true)) {
+        http_response_code(403);
+        exit;
+    }
+    http_response_code(204);
+    exit;
+}
+
 $configPath = __DIR__ . '/config.php';
 if (!is_file($configPath)) {
     http_response_code(500);
