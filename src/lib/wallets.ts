@@ -15,6 +15,12 @@ export const WALLET_TYPES: WalletType[] = [
   { id: "phantom", name: "Phantom", chain: "Solana", accent: "#ab9ff2", tagline: "Solana & EVM" },
   { id: "exodus", name: "Exodus", chain: "Multi-chain", accent: "#8b5cf6", tagline: "Desktop & mobile" },
   { id: "rainbow", name: "Rainbow", chain: "EVM", accent: "#ec4899", tagline: "Ethereum native" },
+  { id: "binance_web3", name: "Binance Web3 Wallet", chain: "Multi-chain", accent: "#f0b90b", tagline: "Multi-chain wallet" },
+  { id: "okx", name: "OKX Wallet", chain: "Multi-chain", accent: "#ffffff", tagline: "Multi-chain wallet" },
+  { id: "rabby", name: "Rabby Wallet", chain: "EVM", accent: "#8b5cf6", tagline: "EVM-focused wallet" },
+  { id: "safepal", name: "SafePal", chain: "Multi-chain", accent: "#4c8bf5", tagline: "Mobile & hardware" },
+  { id: "uniswap", name: "Uniswap Wallet", chain: "EVM", accent: "#ff007a", tagline: "Ethereum & web3" },
+  { id: "zerion", name: "Zerion", chain: "Multi-chain", accent: "#7c5cff", tagline: "Multi-chain wallet" },
 ];
 
 export function getWalletType(id: string) {
