@@ -6,11 +6,8 @@ import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import {
   Activity,
-  AlertTriangle,
   Clock,
   Database,
-  EyeOff,
-  FileClock,
   HardDrive,
   History,
   LogOut,
@@ -78,7 +75,7 @@ export default function DashboardClient({
     (backups.some((b) => b.status === "pending") ? 10 : 0);
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen overflow-x-clip">
       <div className="bg-grid absolute inset-x-0 top-0 h-[440px]" />
       <div className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[760px] -translate-x-1/2 rounded-full bg-aegis/[0.07] blur-[120px]" />
 
@@ -134,7 +131,7 @@ export default function DashboardClient({
         </div>
       </header>
 
-      <div id="dashboard" className="relative mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-8">
+      <div id="dashboard" className="relative mx-auto max-w-7xl px-4 pb-12 pt-7 sm:px-6 sm:pb-20 sm:pt-10 lg:px-8">
         {/* greeting */}
         <motion.div
           initial={{ opacity: 0, y: 22 }}
@@ -156,33 +153,15 @@ export default function DashboardClient({
           </p>
         </motion.div>
 
-        {/* safety banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.08, ease }}
-          className="mb-8 flex items-start gap-3.5 rounded-2xl border border-aegis/25 bg-gradient-to-r from-aegis/[0.09] to-glow/[0.05] px-5 py-4"
-        >
-          <EyeOff className="mt-0.5 h-5 w-5 shrink-0 text-aegis" />
-          <p className="text-[13px] leading-relaxed text-mist">
-            <span className="font-bold text-white">Reminder:</span> AegisVault operates on public
-            addresses and security attestations only.{" "}
-            <span className="font-semibold text-aegis">
-              We never ask for recovery phrases — and neither should anyone else.
-            </span>{" "}
-            If a “support agent” requests your 12/24 words, you are being scammed.
-          </p>
-        </motion.div>
-
-        <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
+        <div className="grid min-w-0 gap-4 sm:gap-5 xl:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
           {/* left: score */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.75, delay: 0.12, ease }}
-            className="space-y-5"
+            className="min-w-0 space-y-4 sm:space-y-5"
           >
-            <Card className="noise relative overflow-hidden p-7">
+            <Card className="noise relative min-w-0 overflow-hidden p-5 sm:p-7">
               <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-aegis/10 blur-3xl" />
               <div className="flex flex-col items-center">
                 <ScoreRing score={score} />
@@ -221,7 +200,7 @@ export default function DashboardClient({
             </Card>
 
             {/* activity */}
-            <Card className="p-6">
+            <Card className="min-w-0 p-4 sm:p-6">
               <p id="activity-history" className="scroll-mt-24 mb-4 flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-fog">
                 <History className="h-4 w-4 text-aegis" /> Activity
               </p>
@@ -253,15 +232,15 @@ export default function DashboardClient({
           </motion.div>
 
           {/* right: protection layers */}
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-4 sm:space-y-5">
             {/* wallet protection */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75, delay: 0.18, ease }}
             >
-              <Card className="p-6 sm:p-7">
-                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <Card className="min-w-0 p-4 sm:p-7">
+                <div className="mb-5 flex min-w-0 flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
                   <div>
                     <h2 id="wallet-protection" className="scroll-mt-24 flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight text-white">
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-aegis/25 bg-aegis/[0.08] text-aegis">
@@ -273,7 +252,7 @@ export default function DashboardClient({
                       Connect wallets by public address · human-reviewed · pending → connected
                     </p>
                   </div>
-                  <Button onClick={() => setConnectOpen(true)}>
+                  <Button className="w-full sm:w-auto" onClick={() => setConnectOpen(true)}>
                     <Plus className="h-4 w-4" /> Connect wallet
                   </Button>
                 </div>
@@ -300,7 +279,7 @@ export default function DashboardClient({
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.25 + i * 0.06, duration: 0.5, ease }}
-                          className="flex flex-col gap-3 rounded-2xl border border-line bg-white/[0.02] p-4 sm:flex-row sm:items-center"
+                          className="flex min-w-0 flex-col gap-3 rounded-2xl border border-line bg-white/[0.02] p-3 sm:flex-row sm:items-center sm:p-4"
                         >
                           <span
                             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white/[0.04]"
@@ -313,7 +292,7 @@ export default function DashboardClient({
                               {meta?.name ?? w.walletType}
                               {w.label && <span className="ml-2 text-xs font-normal text-fog">· {w.label}</span>}
                             </p>
-                            <p className="mono mt-0.5 text-xs text-aegis/90">
+                            <p className="mono mt-0.5 break-all text-xs text-aegis/90">
                               {shortAddress(w.address)} · {w.chain}
                             </p>
                             {w.status === "rejected" && w.reviewNote && (
@@ -356,7 +335,7 @@ export default function DashboardClient({
                       Attest safe offline storage · analyst-approved · phrase never collected
                     </p>
                   </div>
-                  <Button variant="outline" onClick={() => setBackupOpen(true)}>
+                  <Button variant="outline" className="w-full sm:w-auto" onClick={() => setBackupOpen(true)}>
                     <Plus className="h-4 w-4" /> Backup wallet
                   </Button>
                 </div>
@@ -418,29 +397,7 @@ export default function DashboardClient({
               </Card>
             </motion.div>
 
-            {/* educational tip */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.3, ease }}
-              className="flex items-start gap-4 rounded-2xl border border-amber-warn/25 bg-amber-warn/[0.05] p-5"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-warn/25 bg-amber-warn/10 text-amber-warn">
-                <AlertTriangle className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-white">Spot the “wallet flashing” trick</p>
-                <p className="mt-1 text-[12.5px] leading-relaxed text-fog">
-                  Scammers show fake USDT or BTC balances in a “watch-only” or imported wallet, then
-                  demand a fee to “unlock” them. Real funds settle on-chain and never need a release
-                  fee. When in doubt, verify the balance on a public block explorer — never in the
-                  app a stranger gave you.
-                </p>
-                <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-warn/90">
-                  <FileClock className="h-3.5 w-3.5" /> Median human review time: under 24 hours
-                </p>
-              </div>
-            </motion.div>
+
           </div>
         </div>
       </div>
