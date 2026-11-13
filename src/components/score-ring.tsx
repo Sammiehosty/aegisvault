@@ -46,7 +46,7 @@ export function ScoreRing({ score, size = 168 }: { score: number; size?: number 
           {clamped}
         </motion.span>
         <span className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.22em] text-fog">
-          Security score
+          Setup progress
         </span>
       </div>
     </div>
