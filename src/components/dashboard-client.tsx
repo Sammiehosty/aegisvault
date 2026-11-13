@@ -14,6 +14,9 @@ import {
   HardDrive,
   History,
   LogOut,
+  Menu,
+  Bell,
+  X,
   Plus,
   ShieldCheck,
   Wallet,
@@ -65,6 +68,7 @@ export default function DashboardClient({
   const router = useRouter();
   const [connectOpen, setConnectOpen] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [signingOut, startSignOut] = useTransition();
 
   const firstName = user.fullName.split(" ")[0];
@@ -89,38 +93,48 @@ export default function DashboardClient({
               Aegis<span className="text-aegis">Vault</span>
             </span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden items-center gap-2.5 rounded-xl border border-line bg-white/[0.03] px-3.5 py-2 sm:flex">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-aegis/15 font-display text-[11px] font-bold text-aegis">
                 {firstName[0]?.toUpperCase()}
               </span>
               <span className="max-w-[160px] truncate text-[13px] font-medium text-mist">{user.email}</span>
             </div>
-            <Button
-              variant="subtle"
-              loading={signingOut}
-              onClick={() =>
-                startSignOut(async () => {
-                  try {
-                    await logoutAction();
-                    toast.success("Signed out. Stay vigilant.");
-                    router.push("/");
-                    router.refresh();
-                  } catch {
-                    router.push("/");
-                    router.refresh();
-                  }
-                })
-              }
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign out</span>
-            </Button>
+            <button type="button" aria-label="Open activity history" title="Activity history"
+              onClick={() => document.getElementById("activity-history")?.scrollIntoView({behavior:"smooth",block:"start"})}
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white/[0.04] text-mist hover:border-aegis/40 hover:text-aegis">
+              <Bell className="h-5 w-5" />
+              {activity.length > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-aegis ring-2 ring-ink" />}
+            </button>
+            <div className="relative">
+              <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen}
+                aria-label={menuOpen ? "Close dashboard menu" : "Open dashboard menu"}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white/[0.04] text-mist hover:border-aegis/40 hover:text-aegis">
+                {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+              {menuOpen && <nav className="absolute right-0 top-12 z-50 w-60 rounded-2xl border border-line-strong bg-panel p-2 shadow-2xl">
+                {[
+                  {label:"Dashboard",href:"#dashboard"},
+                  {label:"Wallet protection",href:"#wallet-protection"},
+                  {label:"Backup verification",href:"#backup-verification"},
+                  {label:"Activity history",href:"#activity-history"},
+                  {label:"AegisVault home",href:"/"},
+                ].map((item) => <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
+                  className="block rounded-xl px-3.5 py-2.5 text-sm text-mist hover:bg-aegis/[0.08] hover:text-aegis">{item.label}</a>)}
+                <div className="my-1 border-t border-line" />
+                <button type="button" disabled={signingOut} onClick={() => startSignOut(async () => {
+                  try { await logoutAction(); toast.success("Signed out. Stay vigilant."); }
+                  finally { router.push("/"); router.refresh(); }
+                })} className="flex w-full items-center gap-2 rounded-xl px-3.5 py-2.5 text-left text-sm text-danger hover:bg-danger/10">
+                  <LogOut className="h-4 w-4" /> {signingOut ? "Signing out..." : "Sign out"}
+                </button>
+              </nav>}
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="relative mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-8">
+      <div id="dashboard" className="relative mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-8">
         {/* greeting */}
         <motion.div
           initial={{ opacity: 0, y: 22 }}
