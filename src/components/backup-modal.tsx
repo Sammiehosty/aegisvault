@@ -209,7 +209,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
               <p className="text-xs leading-relaxed text-fog">
                 Backup your wallet for system review and keep learning how to spot wallet flashing,
                 fake balances, phishing and malicious approvals. This request does not store, connect to,
-                monitor or control your wallet, and it can block fake transactions.
+                monitor or control your wallet, and it only can block fake transactions.
               </p>
             </div>
 
