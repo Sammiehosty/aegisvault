@@ -8,9 +8,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-grotesk" });
 
 export const metadata: Metadata = {
-  title: "AegisVault — Crypto Asset Security & Scam Prevention",
+  title: "AegisVault — Wallet Scam Protection & Crypto Safety",
   description:
-    "Protect your crypto assets from phishing, flash-balance scams and seed-phrase theft. Verified wallet protection with human compliance review. We never ask for your recovery phrase.",
+    "Learn to recognise wallet flashing, fake token balances, phishing, malicious approvals, address poisoning and recovery-phrase theft. Submit public wallet addresses for human review. Never share your recovery phrase or private keys.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
