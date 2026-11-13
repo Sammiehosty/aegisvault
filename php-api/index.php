@@ -177,6 +177,8 @@ function notifyTelegramRequest(PDO $pdo, array $config, string $kind, string $re
                 'inline_keyboard' => [[
                     ['text' => '✅ Approve', 'callback_data' => $prefix.'a:'.$requestId],
                     ['text' => '❌ Reject', 'callback_data' => $prefix.'r:'.$requestId],
+                ], [
+                    ['text' => '🗑 Delete request', 'callback_data' => $prefix.'d:'.$requestId],
                 ]],
             ],
         ]);
@@ -193,22 +195,11 @@ function handleTelegramWebhook(PDO $pdo, array $config, array $update): void {
     $chatId = (string)($callback['message']['chat']['id'] ?? '');
     $data = (string)($callback['data'] ?? '');
     if ($fromId !== (string)$config['telegram_admin_telegram_user_id'] || $chatId !== (string)$config['telegram_admin_chat_id']) {
-        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'You are not authorised to review requests.','show_alert'=>true]);
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'You are not authorised to manage requests.','show_alert'=>true]);
         return;
     }
-    if (!preg_match('/^av:([wb]):([ar]):([a-f0-9-]{36})$/i', $data, $m)) {
-        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'Invalid review action.','show_alert'=>true]);
-        return;
-    }
-    $kind = $m[1] === 'w' ? 'wallet' : 'backup';
-    $decision = $m[2] === 'a' ? 'approved' : 'rejected';
-    $id = $m[3];
-    $table = $kind === 'wallet' ? 'wallet_requests' : 'backup_requests';
-    $q = $pdo->prepare("SELECT * FROM {$table} WHERE id=? LIMIT 1");
-    $q->execute([$id]);
-    $req = $q->fetch(PDO::FETCH_ASSOC);
-    if (!$req || $req['status'] !== 'pending') {
-        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'This request has already been reviewed or no longer exists.','show_alert'=>true]);
+    if (!preg_match('/^av:([wb]):([ard]):([a-f0-9-]{36})$/i', $data, $m)) {
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'Invalid request action.','show_alert'=>true]);
         return;
     }
     $adminId = (string)$config['telegram_admin_user_id'];
@@ -218,17 +209,42 @@ function handleTelegramWebhook(PDO $pdo, array $config, array $update): void {
         if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'Telegram reviewer is not configured as an admin account.','show_alert'=>true]);
         return;
     }
+    $kind = $m[1] === 'w' ? 'wallet' : 'backup';
+    $action = $m[2];
+    $id = $m[3];
+    $table = $kind === 'wallet' ? 'wallet_requests' : 'backup_requests';
+    $q = $pdo->prepare("SELECT * FROM {$table} WHERE id=? LIMIT 1");
+    $q->execute([$id]);
+    $req = $q->fetch(PDO::FETCH_ASSOC);
+    if (!$req) {
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'This request no longer exists.','show_alert'=>true]);
+        return;
+    }
+    if ($action === 'd') {
+        $del = $pdo->prepare("DELETE FROM {$table} WHERE id=?");
+        $del->execute([$id]);
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'Request deleted.']);
+        $summary = "🗑 <b>REQUEST DELETED</b>\nType: ".htmlspecialchars($kind, ENT_QUOTES, 'UTF-8')."\nWallet: ".htmlspecialchars((string)$req['wallet_type'], ENT_QUOTES, 'UTF-8')."\nAddress: <code>".htmlspecialchars((string)($req['address'] ?? ''), ENT_QUOTES, 'UTF-8')."</code>";
+        if (isset($callback['message']['message_id'])) telegramApi($config, 'editMessageText', ['chat_id'=>$chatId,'message_id'=>(int)$callback['message']['message_id'],'text'=>$summary,'parse_mode'=>'HTML','reply_markup'=>['inline_keyboard'=>[]]]);
+        return;
+    }
+    if ($req['status'] !== 'pending') {
+        if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'This request has already been reviewed.','show_alert'=>true]);
+        return;
+    }
+    $decision = $action === 'a' ? 'approved' : 'rejected';
     $pdo->beginTransaction();
     try {
-        $q = $pdo->prepare("UPDATE {$table} SET status=?,review_note=?,reviewed_by=?,reviewed_at=UTC_TIMESTAMP() WHERE id=? AND status='pending'");
-        $q->execute([$decision, null, $adminId, $id]);
+        $q = $pdo->prepare("UPDATE {$table} SET status=?,review_note=NULL,reviewed_by=?,reviewed_at=UTC_TIMESTAMP() WHERE id=? AND status='pending'");
+        $q->execute([$decision, $adminId, $id]);
         if ($q->rowCount() !== 1) {
             $pdo->rollBack();
             if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>'This request was already processed.','show_alert'=>true]);
             return;
         }
-        if ($kind === 'wallet') $message = $decision === 'approved' ? 'Wallet protection approved — '.$req['wallet_type'].' public address review approved.' : 'Wallet protection request declined by an administrator.';
-        else $message = $decision === 'approved' ? 'Backup wallet protection approved — '.$req['wallet_type'].' public address review approved.' : 'Backup wallet protection request declined by an administrator.';
+        $message = $kind === 'wallet'
+            ? ($decision === 'approved' ? 'Wallet protection approved — '.$req['wallet_type'].' public address review approved.' : 'Wallet protection request declined by an administrator.')
+            : ($decision === 'approved' ? 'Backup wallet protection approved — '.$req['wallet_type'].' public address review approved.' : 'Backup wallet protection request declined by an administrator.');
         logEvent($pdo, $req['user_id'], $kind, $message, true);
         $pdo->commit();
     } catch (Throwable $e) {
@@ -236,16 +252,10 @@ function handleTelegramWebhook(PDO $pdo, array $config, array $update): void {
         throw $e;
     }
     if ($callbackId !== '') telegramApi($config, 'answerCallbackQuery', ['callback_query_id'=>$callbackId,'text'=>$decision === 'approved' ? 'Request approved.' : 'Request rejected.']);
-    if (isset($callback['message']['chat']['id'], $callback['message']['message_id'])) {
+    if (isset($callback['message']['message_id'])) {
         $result = $decision === 'approved' ? '✅ <b>APPROVED</b>' : '❌ <b>REJECTED</b>';
         $summary = $result."\nRequest type: ".htmlspecialchars($kind, ENT_QUOTES, 'UTF-8')."\nWallet: ".htmlspecialchars((string)$req['wallet_type'], ENT_QUOTES, 'UTF-8')."\nAddress: <code>".htmlspecialchars((string)($req['address'] ?? ''), ENT_QUOTES, 'UTF-8')."</code>";
-        telegramApi($config, 'editMessageText', [
-            'chat_id' => $chatId,
-            'message_id' => (int)$callback['message']['message_id'],
-            'text' => $summary,
-            'parse_mode' => 'HTML',
-            'reply_markup' => ['inline_keyboard' => []],
-        ]);
+        telegramApi($config, 'editMessageText', ['chat_id'=>$chatId,'message_id'=>(int)$callback['message']['message_id'],'text'=>$summary,'parse_mode'=>'HTML','reply_markup'=>['inline_keyboard'=>[]]]);
     }
 }
 
@@ -376,6 +386,10 @@ try {
         'POST /backup-requests',
         'POST /wallet-requests/review',
         'POST /backup-requests/review',
+        'POST /admin/users/delete',
+        'POST /admin/requests/delete',
+        'POST /admin/settings',
+        'POST /admin/change-password',
     ];
     if (in_array($method . ' ' . $path, $protectedRoutes, true) && !$user) {
         respond(401,['ok'=>false,'error'=>'Your session has expired. Please sign in again.']);
@@ -395,7 +409,47 @@ try {
         $backupRows=rows($pdo,'SELECT b.*,u.full_name AS user_name,u.email AS user_email FROM backup_requests b JOIN users u ON u.id=b.user_id ORDER BY b.created_at DESC LIMIT 200');
         $activity=rows($pdo,'SELECT a.*,u.email AS user_email FROM activity_events a JOIN users u ON u.id=a.user_id WHERE a.is_admin_visible=1 ORDER BY a.created_at DESC LIMIT 60');
         $convert=function(array $r):array { foreach($r as $k=>$v){$camel=lcfirst(str_replace(' ','',ucwords(str_replace('_',' ',$k))));if($camel!==$k){$r[$camel]=$v;unset($r[$k]);}} if(isset($r['checklist']))$r['checklist']=json_decode((string)$r['checklist'],true)?:[]; return $r; };
-        respond(200,['ok'=>true,'admin'=>publicUser($user),'users'=>array_map($convert,$allUsers),'walletRows'=>array_map($convert,$walletRows),'backupRows'=>array_map($convert,$backupRows),'activity'=>array_map($convert,$activity)]);
+        $settingRows=rows($pdo,"SELECT setting_key,setting_value FROM app_settings");
+        $settings=[]; foreach($settingRows as $setting){$settings[$setting['setting_key']]=$setting['setting_value'];}
+        respond(200,['ok'=>true,'admin'=>publicUser($user),'appName'=>$settings['app_name'] ?? 'AegisVault','users'=>array_map($convert,$allUsers),'walletRows'=>array_map($convert,$walletRows),'backupRows'=>array_map($convert,$backupRows),'activity'=>array_map($convert,$activity)]);
+    }
+
+    if ($method === 'POST' && str_starts_with($path, '/admin/')) {
+        if ($user['role'] !== 'admin') respond(403,['ok'=>false,'error'=>'Admin access required.']);
+        if ($path === '/admin/users/delete') {
+            $id=cleanString($data['userId']??'',36);
+            if ($id === $user['id']) respond(422,['ok'=>false,'error'=>'You cannot delete your own administrator account.']);
+            $q=$pdo->prepare("SELECT role FROM users WHERE id=? LIMIT 1"); $q->execute([$id]); $targetUser=$q->fetch();
+            if (!$targetUser) respond(404,['ok'=>false,'error'=>'User not found.']);
+            if ($targetUser['role'] === 'admin') respond(403,['ok'=>false,'error'=>'Administrator accounts cannot be deleted here.']);
+            $q=$pdo->prepare('DELETE FROM users WHERE id=?'); $q->execute([$id]);
+            respond(200,['ok'=>true]);
+        }
+        if ($path === '/admin/requests/delete') {
+            $kind=cleanString($data['kind']??'',10); $id=cleanString($data['requestId']??'',36);
+            if (!in_array($kind,['wallet','backup'],true)) respond(422,['ok'=>false,'error'=>'Invalid request type.']);
+            $table=$kind==='wallet'?'wallet_requests':'backup_requests';
+            $q=$pdo->prepare("DELETE FROM {$table} WHERE id=?"); $q->execute([$id]);
+            if ($q->rowCount() < 1) respond(404,['ok'=>false,'error'=>'Request not found.']);
+            respond(200,['ok'=>true]);
+        }
+        if ($path === '/admin/settings') {
+            $name=cleanString($data['appName']??'',80);
+            if (textLength($name)<2) respond(422,['ok'=>false,'error'=>'App name must contain at least 2 characters.']);
+            $q=$pdo->prepare("INSERT INTO app_settings (setting_key,setting_value) VALUES ('app_name',?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value)");
+            $q->execute([$name]);
+            respond(200,['ok'=>true,'appName'=>$name]);
+        }
+        if ($path === '/admin/change-password') {
+            $current=(string)($data['currentPassword']??''); $new=(string)($data['newPassword']??'');
+            $q=$pdo->prepare('SELECT password_hash FROM users WHERE id=? LIMIT 1'); $q->execute([$user['id']]); $row=$q->fetch();
+            if (!$row || !password_verify($current,$row['password_hash'])) respond(422,['ok'=>false,'error'=>'Current password is incorrect.']);
+            if (strlen($new)<10) respond(422,['ok'=>false,'error'=>'New password must be at least 10 characters.']);
+            $q=$pdo->prepare('UPDATE users SET password_hash=? WHERE id=?'); $q->execute([password_hash($new,PASSWORD_DEFAULT),$user['id']]);
+            $q=$pdo->prepare('DELETE FROM sessions WHERE user_id=? AND id<>?'); $q->execute([$user['id'], $_SESSION['session_id'] ?? '']);
+            respond(200,['ok'=>true]);
+        }
+        respond(404,['ok'=>false,'error'=>'Admin endpoint not found.']);
     }
 
     if ($method === 'POST' && $path === '/wallet-requests') {
