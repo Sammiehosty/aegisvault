@@ -159,7 +159,7 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
               >
                 {chain ? (
                   <>
-                    <BadgeCheck className="h-4 w-4" /> Valid {chain} address detected
+                    <BadgeCheck className="h-4 w-4" /> {chain === "Other" ? "Address entered" : `Valid ${chain} address detected`}
                   </>
                 ) : (
                   <>
