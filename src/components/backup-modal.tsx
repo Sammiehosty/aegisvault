@@ -95,7 +95,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
             <p className="mb-4 text-[13px] text-fog">
               Select the wallet whose backup you want to protect with AegisVault:
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2">
               {WALLET_TYPES.map((w) => (
                 <button
                   key={w.id}
