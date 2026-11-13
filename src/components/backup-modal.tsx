@@ -158,7 +158,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
               >
                 {chain === "Other" ? (
                   <>
-                    <ShieldAlert className="h-4 w-4" /> Your wallet is not backed up.
+                    <ShieldAlert className="h-4 w-4" /> Your wallet is not yet backed up.
                   </>
                 ) : chain ? (
                   <>
@@ -173,7 +173,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
             )}
 
             <Button className="w-full py-3" disabled={!chain} onClick={() => setStep(2)}>
-              Continue to Protect
+              Continue to Backup
               <ArrowRight className="h-4 w-4" />
             </Button>
           </motion.div>

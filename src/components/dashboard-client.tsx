@@ -151,7 +151,7 @@ export default function DashboardClient({
             Crypto scam protection center
           </p>
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Stay alert, {firstName}.
+            Stay Alert, {firstName}.
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-fog">
             Use AegisVault's protection to spot wallet flashing, fake balances, phishing and malicious approvals, and learn how to verify payment claims before treating them as received. 
@@ -236,7 +236,7 @@ export default function DashboardClient({
                   <EmptyState
                     icon={<Wallet className="h-5 w-5" />}
                     title="No wallets under protection yet"
-                    body="Backup your wallet for a system review. Approval records the review decision; it does not connect to your wallet or monitor/block transactions."
+                    body="Connect your wallet for a system review. Approval records the review decision; monitor and block fake transactions."
                     action={
                       <Button variant="outline" onClick={() => setConnectOpen(true)}>
                         <Plus className="h-4 w-4" /> Connect your first wallet
