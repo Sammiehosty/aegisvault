@@ -154,7 +154,7 @@ export default function DashboardClient({
             Stay alert, {firstName}.
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-fog">
-            Track your wallet protection and backup review requests here. Use AegisVault's scam-safety guidance to spot wallet flashing, fake balances, phishing and malicious approvals. Request approval is not live transaction monitoring or a guarantee against loss.
+            Track your wallet protection and backup review requests here. Use AegisVault's scam-safety guidance to spot wallet flashing, fake balances, phishing and malicious approvals, and learn how to verify payment claims before treating them as received. Request approval is not live transaction monitoring or a guarantee against loss.
           </p>
         </motion.div>
 
