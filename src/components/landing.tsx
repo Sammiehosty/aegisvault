@@ -213,7 +213,7 @@ function Hero() {
           <div className="glass noise relative overflow-hidden rounded-[28px] p-2 ring-glow">
             <div className="relative overflow-hidden rounded-[20px]">
               <Image
-                src="/images/hero-vault.jpg"
+                src="/images/hero-vault.svg"
                 alt="AegisVault digital vault shield"
                 width={880}
                 height={880}
