@@ -30,7 +30,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 type User = { id: string; fullName: string; email: string; role: "user" | "admin"; createdAt: string };
 type WalletRequest = { id: string; userId: string; walletType: string; label: string | null; address: string; chain: string; status: "pending" | "approved" | "rejected"; reviewNote: string | null; reviewedBy: string | null; reviewedAt: string | null; createdAt: string };
-type BackupRequest = { id: string; userId: string; method: "paper" | "steel" | "hardware" | "shamir"; walletType: string; checklist: Record<string, boolean>; status: "pending" | "approved" | "rejected"; reviewNote: string | null; reviewedBy: string | null; reviewedAt: string | null; createdAt: string };
+type BackupRequest = { id: string; userId: string; method: "paper" | "steel" | "hardware" | "shamir"; walletType: string; checklist: Record<string, boolean>; address?: string | null; chain?: string | null; status: "pending" | "approved" | "rejected"; reviewNote: string | null; reviewedBy: string | null; reviewedAt: string | null; createdAt: string };
 type ActivityEvent = { id: string; userId: string; kind: string; message: string; isAdminVisible: boolean; createdAt: string };
 
 export type WalletRow = WalletRequest & { userName: string; userEmail: string };
@@ -381,11 +381,18 @@ export default function AdminClient({
                 ) : (
                   <>
                     <p className="text-sm font-semibold text-white">
-                      {getWalletType(target.row.walletType)?.name ?? target.row.walletType} backup
+                      {getWalletType(target.row.walletType)?.name ?? target.row.walletType} backup verification
                     </p>
-                    <p className="mt-1 text-xs text-fog">
-                      {BACKUP_METHODS.find((m) => m.id === target.row.method)?.label}
-                    </p>
+                    {target.row.address ? (
+                      <>
+                        <p className="mono mt-1 break-all text-xs leading-relaxed text-aegis/90">{target.row.address}</p>
+                        <p className="mt-1.5 text-[11px] text-fog">Network: {target.row.chain ?? "Other"} · Public address submitted</p>
+                      </>
+                    ) : (
+                      <p className="mt-1 text-xs text-fog">
+                        Legacy backup method: {BACKUP_METHODS.find((m) => m.id === target.row.method)?.label}
+                      </p>
+                    )}
                   </>
                 )}
               </div>
@@ -520,17 +527,16 @@ function BackupTable({ rows, onReview }: { rows: BackupRow[]; onReview: (r: Back
     <div className="space-y-2.5">
       {rows.map((r) => {
         const meta = getWalletType(r.walletType);
-        const method = BACKUP_METHODS.find((m) => m.id === r.method);
-        const confirmed = Object.values(r.checklist ?? {}).filter(Boolean).length;
+
         return (
           <div key={r.id} className="flex flex-col gap-3 rounded-2xl border border-line bg-white/[0.02] p-4 lg:flex-row lg:items-center">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-glow/25 bg-glow/[0.07] text-glow">
               <HardDrive className="h-4.5 w-4.5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white">{meta?.name ?? r.walletType} backup</p>
-              <p className="mt-0.5 text-xs text-fog">
-                {method?.label} · {confirmed}/6 practices
+              <p className="text-sm font-semibold text-white">{meta?.name ?? r.walletType} backup verification</p>
+              <p className="mono mt-0.5 break-all text-xs text-fog">
+                {r.address ? `${shortAddress(r.address)} · ${r.chain ?? "Other"}` : "Legacy backup verification"}
               </p>
             </div>
             <div className="min-w-0 lg:w-48">
