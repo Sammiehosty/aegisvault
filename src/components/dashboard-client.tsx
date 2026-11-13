@@ -310,7 +310,7 @@ export default function DashboardClient({
                       Backup verification
                     </h2>
                     <p className="mt-1.5 text-[12.5px] text-fog">
-                      Attest safe offline storage · analyst-approved · phrase never collected
+                      Submit a public wallet address · analyst-reviewed · pending → protected
                     </p>
                   </div>
                   <Button variant="outline" className="w-full sm:w-auto" onClick={() => setBackupOpen(true)}>
@@ -322,7 +322,7 @@ export default function DashboardClient({
                   <EmptyState
                     icon={<HardDrive className="h-5 w-5" />}
                     title="No backup verification requested"
-                    body="Run the guided checklist to verify your recovery setup is airtight — without ever revealing the phrase itself."
+                    body="Submit your public wallet address to request backup protection review by an AegisVault analyst."
                     action={
                       <Button variant="outline" onClick={() => setBackupOpen(true)}>
                         <Plus className="h-4 w-4" /> Start backup verification
