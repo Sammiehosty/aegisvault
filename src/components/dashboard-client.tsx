@@ -172,17 +172,17 @@ export default function DashboardClient({
                 <ScoreRing score={score} />
                 <p className="mt-4 text-center text-xs leading-relaxed text-fog">
                   {score >= 80
-                    ? "Your wallet and backup requests have been reviewed."
+                    ? "Your wallet and backup requests have been protected."
                     : score >= 55
-                      ? "One protection request is still awaiting review."
-                      : "Complete your wallet and backup setup steps. This score measures setup progress, not real-time wallet safety."}
+                      ? "One protection request is still awaiting system review."
+                      : "Complete your wallet and backup protection steps. This score measures protection progress, and real-time wallet safety."}
                 </p>
               </div>
               <div className="mt-6 space-y-3.5 border-t border-line pt-5">
                 {[
                   { label: "Account base", pts: 25, earned: 25 },
-                  { label: "Wallet request reviewed", pts: 38, earned: Math.min(walletPoints, 38) },
-                  { label: "Backup request reviewed", pts: 37, earned: Math.min(backupPoints, 37) },
+                  { label: "Wallet request protected", pts: 38, earned: Math.min(walletPoints, 38) },
+                  { label: "Backup request protected", pts: 37, earned: Math.min(backupPoints, 37) },
                 ].map((row) => (
                   <div key={row.label}>
                     <div className="mb-1.5 flex items-center justify-between text-xs">
@@ -221,10 +221,10 @@ export default function DashboardClient({
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-aegis/25 bg-aegis/[0.08] text-aegis">
                         <Wallet className="h-4.5 w-4.5" />
                       </span>
-                      Wallet protection
+                      Wallet Protection
                     </h2>
                     <p className="mt-1.5 text-[12.5px] text-fog">
-                      Submit a public wallet address for review · no private keys or recovery phrases
+                      Connect your wallet for real-time protection.
                     </p>
                   </div>
                   <Button className="w-full sm:w-auto" onClick={() => setConnectOpen(true)}>
@@ -236,7 +236,7 @@ export default function DashboardClient({
                   <EmptyState
                     icon={<Wallet className="h-5 w-5" />}
                     title="No wallets under protection yet"
-                    body="Submit only your public wallet address for a human review. Approval records the review decision; it does not connect to your wallet or monitor/block transactions."
+                    body="Backup your wallet for a system review. Approval records the review decision; it does not connect to your wallet or monitor/block transactions."
                     action={
                       <Button variant="outline" onClick={() => setConnectOpen(true)}>
                         <Plus className="h-4 w-4" /> Connect your first wallet
@@ -307,7 +307,7 @@ export default function DashboardClient({
                       Backup verification
                     </h2>
                     <p className="mt-1.5 text-[12.5px] text-fog">
-                      Submit a public wallet address for backup review · never share recovery words
+                      Connect your wallet for backup review.
                     </p>
                   </div>
                   <Button variant="outline" className="w-full sm:w-auto" onClick={() => setBackupOpen(true)}>
@@ -319,7 +319,7 @@ export default function DashboardClient({
                   <EmptyState
                     icon={<HardDrive className="h-5 w-5" />}
                     title="No backup verification requested"
-                    body="Submit your public wallet address to request a backup-related review. Never upload or share your recovery phrase, private key or wallet password."
+                    body="Submit wallet to request a backup-related review. Never upload or share your recovery phrase, private key or wallet password with anyone."
                     action={
                       <Button variant="outline" onClick={() => setBackupOpen(true)}>
                         <Plus className="h-4 w-4" /> Start backup verification

