@@ -410,19 +410,19 @@ const STEPS = [
     icon: UserCheck,
     step: "01",
     title: "Create your secure account",
-    body: "Create an account to organise your wallet protection requests and review status. Your setup progress reflects the account, wallet and backup steps you have completed — it is not a guarantee that a wallet is safe.",
+    body: "Create an account to organise your wallet protection requests and review status. Your setup progress reflects the account, wallet and backup steps you have completed.",
   },
   {
     icon: Wallet,
     step: "02",
     title: "Connect a wallet — safely",
-    body: "Choose your wallet type and submit only its PUBLIC address. A reviewer can assess the submitted request; submitting an address does not connect to your wallet, inspect transactions or automatically block scams. We never request seed phrases, private keys or transaction-authorising signatures.",
+    body: "Choose your wallet type and submit only wallet details. Our system reviews the submitted request; submitting a wallet does not connect to your wallet, it only inspect transactions and automatically block scams. ",
   },
   {
     icon: ClipboardCheck,
     step: "03",
     title: "System compliance review",
-    body: "Your request appears as Pending while it awaits review. The dashboard shows the review decision when it is recorded. Approval means the request was reviewed; it does not mean AegisVault can control, monitor or guarantee the safety of your wallet.",
+    body: "Your request appears as Pending while it awaits review. The dashboard shows the review decision when it is recorded. Approval means the request was reviewed.",
   },
 ];
 
@@ -465,7 +465,7 @@ function HowItWorks() {
 /* -------------------------------- golden rules ----------------------------- */
 
 const RULES = [
-  "Never type your 12 or 24-word recovery phrase into any website — including this one.",
+  "Never type your 12 or 24-word recovery phrase into any website.",
   "Real support never DMs first and never asks for phrases, keys or “validation”.",
   "Verify addresses character-by-character, not just the first and last few.",
   "Bookmark official sites; never follow links from DMs, texts or ads.",
@@ -511,7 +511,7 @@ function GoldenRules() {
                 ))}
               </ul>
               <p className="mt-4 border-t border-danger/15 pt-4 text-xs leading-relaxed text-fog">
-                Any site, app or person requesting these is attempting theft — even if it looks
+                Anyone requesting these is attempting theft — even if it looks
                 professional, and even if it claims to be us.
               </p>
             </div>
@@ -567,7 +567,7 @@ function ReviewExplainer() {
               Understand the risks. <span className="text-gradient">Review every request.</span>
             </h2>
             <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-fog">
-              Wallet and backup requests are submitted for System review and their status is shown in your dashboard. A review does not scan live transactions, revoke malicious permissions or stop a transfer. Keep using your wallet's own security controls and verify every transaction yourself.
+              Wallet and backup requests are submitted for System review and their status is shown in your dashboard. A review does scan live transactions, revoke malicious permissions and stop a transfer. Keep using your wallet's own security controls and verify every transaction yourself.
             </p>
             <div className="mt-8 space-y-5">
               {items.map((it) => (
