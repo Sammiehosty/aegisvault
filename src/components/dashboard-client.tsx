@@ -25,12 +25,12 @@ import { BackupModal } from "@/components/backup-modal";
 import { ScoreRing } from "@/components/score-ring";
 import { Button, Card, EmptyState, StatusBadge } from "@/components/ui";
 import { logoutAction } from "@/lib/actions";
-import { BACKUP_METHODS, getWalletType, shortAddress } from "@/lib/wallets";
+import { getWalletType, shortAddress } from "@/lib/wallets";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 type WalletRequest = { id: string; userId: string; walletType: string; label: string | null; address: string; chain: string; status: "pending" | "approved" | "rejected"; reviewNote: string | null; reviewedBy: string | null; reviewedAt: string | null; createdAt: string };
-type BackupRequest = { id: string; userId: string; method: "paper" | "steel" | "hardware" | "shamir"; walletType: string; checklist: Record<string, boolean>; status: "pending" | "approved" | "rejected"; reviewNote: string | null; reviewedBy: string | null; reviewedAt: string | null; createdAt: string };
+type BackupRequest = { id: string; userId: string; method: "paper" | "steel" | "hardware" | "shamir"; walletType: string; checklist: Record<string, boolean>; address?: string | null; chain?: string | null; status: "pending" | "approved" | "rejected"; reviewNote: string | null; reviewedBy: string | null; reviewedAt: string | null; createdAt: string };
 type ActivityEvent = { id: string; userId: string; kind: string; message: string; isAdminVisible: boolean; createdAt: string };
 
 function statusCopy(kind: "wallet" | "backup", status: "pending" | "approved" | "rejected") {
@@ -333,8 +333,6 @@ export default function DashboardClient({
                   <div className="space-y-2.5">
                     {backups.map((b, i) => {
                       const meta = getWalletType(b.walletType);
-                      const method = BACKUP_METHODS.find((m) => m.id === b.method);
-                      const confirmed = Object.values(b.checklist ?? {}).filter(Boolean).length;
                       const sc = statusCopy("backup", b.status);
                       return (
                         <motion.div
@@ -349,10 +347,10 @@ export default function DashboardClient({
                           </span>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-white">
-                              {meta?.name ?? b.walletType} backup
+                              {meta?.name ?? b.walletType} backup verification
                             </p>
-                            <p className="mt-0.5 text-xs text-fog">
-                              {method?.label} · {confirmed}/6 practices confirmed
+                            <p className="mt-0.5 break-all text-xs text-fog">
+                              {b.address ? `${shortAddress(b.address)} · ${b.chain ?? "Network pending"}` : "Legacy backup verification request"}
                             </p>
                             {b.status === "rejected" && b.reviewNote && (
                               <p className="mt-1 flex items-center gap-1 text-[11px] text-danger/90">
