@@ -271,13 +271,20 @@ try {
     }
 
     if ($method === 'POST' && $path === '/backup-requests') {
-        $types=walletTypes();$type=cleanString($data['walletType']??'',80);$methodName=cleanString($data['method']??'',20);$check=$data['checklist']??[];
-        if(!isset($types[$type]))respond(422,['ok'=>false,'error'=>'Please choose the wallet this backup protects.']);
-        if(!in_array($methodName,['paper','steel','hardware','shamir'],true))respond(422,['ok'=>false,'error'=>'Please choose a backup method.']);
-        if(!is_array($check) || count($check)<6 || count(array_filter($check,fn($v)=>$v===true))<5)respond(422,['ok'=>false,'error'=>'Please confirm at least 5 of the 6 security practices before requesting verification.']);
-        $q=$pdo->prepare("SELECT id FROM backup_requests WHERE user_id=? AND status='pending' LIMIT 1");$q->execute([$user['id']]);if($q->fetch())respond(409,['ok'=>false,'error'=>'You already have a backup verification under review.']);
-        $q=$pdo->prepare("INSERT INTO backup_requests (id,user_id,method,wallet_type,checklist,status,created_at) VALUES (?,?,?,?,?,'pending',UTC_TIMESTAMP())");$q->execute([uuid(),$user['id'],$methodName,$type,json_encode($check)]);
-        logEvent($pdo,$user['id'],'backup','Backup health verification submitted ('.count(array_filter($check,fn($v)=>$v===true)).'/6 practices confirmed) · pending review',true);respond(201,['ok'=>true]);
+        $types=walletTypes();
+        $type=cleanString($data['walletType']??'',80);
+        $address=cleanString($data['address']??'',255);
+        $chain=walletChain($address);
+        if(!isset($types[$type]))respond(422,['ok'=>false,'error'=>'Please choose a supported wallet type.']);
+        if(!$chain)respond(422,['ok'=>false,'error'=>'Please enter a public wallet address.']);
+        $q=$pdo->prepare("SELECT id FROM backup_requests WHERE user_id=? AND address=? AND status<>'rejected' LIMIT 1");
+        $q->execute([$user['id'],$address]);
+        if($q->fetch())respond(409,['ok'=>false,'error'=>'This wallet already has a backup protection request on your account.']);
+        // Keep the legacy method/checklist columns populated for existing installations.
+        $q=$pdo->prepare("INSERT INTO backup_requests (id,user_id,method,wallet_type,checklist,address,chain,status,created_at) VALUES (?,?,?,?,?,?,?,'pending',UTC_TIMESTAMP())");
+        $q->execute([uuid(),$user['id'],'hardware',$type,json_encode(new stdClass()),$address,$chain]);
+        logEvent($pdo,$user['id'],'backup',$types[$type].' backup protection request submitted ('.substr($address,0,6).'…'.substr($address,-4).') · pending review',true);
+        respond(201,['ok'=>true]);
     }
 
     if ($method === 'POST' && ($path === '/wallet-requests/review' || $path === '/backup-requests/review')) {
