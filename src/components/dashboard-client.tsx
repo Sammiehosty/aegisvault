@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   Clock,
@@ -66,6 +66,7 @@ export default function DashboardClient({
   const [connectOpen, setConnectOpen] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
   const [signingOut, startSignOut] = useTransition();
 
   const firstName = user.fullName.split(" ")[0];
@@ -98,7 +99,7 @@ export default function DashboardClient({
               <span className="max-w-[160px] truncate text-[13px] font-medium text-mist">{user.email}</span>
             </div>
             <button type="button" aria-label="Open activity history" title="Activity history"
-              onClick={() => document.getElementById("activity-history")?.scrollIntoView({behavior:"smooth",block:"start"})}
+              onClick={() => setActivityOpen(true)}
               className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white/[0.04] text-mist hover:border-aegis/40 hover:text-aegis">
               <Bell className="h-5 w-5" />
               {activity.length > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-aegis ring-2 ring-ink" />}
@@ -199,36 +200,6 @@ export default function DashboardClient({
               </div>
             </Card>
 
-            {/* activity */}
-            <Card className="min-w-0 p-4 sm:p-6">
-              <p id="activity-history" className="scroll-mt-24 mb-4 flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-fog">
-                <History className="h-4 w-4 text-aegis" /> Activity
-              </p>
-              <div className="slim-scroll max-h-[320px] space-y-3 overflow-y-auto pr-1">
-                {activity.length === 0 && (
-                  <p className="text-xs text-fog/70">No events yet — submit a protection request.</p>
-                )}
-                {activity.map((ev) => (
-                  <div key={ev.id} className="flex gap-3">
-                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-line bg-white/[0.03] text-aegis">
-                      {ev.kind === "wallet" ? (
-                        <Wallet className="h-3 w-3" />
-                      ) : ev.kind === "backup" ? (
-                        <Database className="h-3 w-3" />
-                      ) : (
-                        <Activity className="h-3 w-3" />
-                      )}
-                    </span>
-                    <div>
-                      <p className="text-xs leading-snug text-mist">{ev.message}</p>
-                      <p className="mt-0.5 text-[10px] uppercase tracking-wider text-fog/60">
-                        {fmtDate(ev.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </motion.div>
 
           {/* right: protection layers */}
@@ -401,6 +372,68 @@ export default function DashboardClient({
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {activityOpen && (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/65 p-3 backdrop-blur-sm sm:p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActivityOpen(false)}
+            role="presentation"
+          >
+            <motion.section
+              id="activity-history"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="activity-title"
+              className="w-full max-w-lg overflow-hidden rounded-2xl border border-line-strong bg-panel shadow-2xl"
+              initial={{ opacity: 0, y: 18, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: 0.22, ease }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-line px-4 py-4 sm:px-6">
+                <h2 id="activity-title" className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.16em] text-white">
+                  <History className="h-4 w-4 text-aegis" /> Activity history
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setActivityOpen(false)}
+                  aria-label="Close activity history"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white/[0.04] text-mist transition hover:border-aegis/40 hover:text-aegis"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="slim-scroll max-h-[min(65vh,480px)] space-y-4 overflow-y-auto p-4 sm:p-6">
+                {activity.length === 0 && (
+                  <p className="py-6 text-center text-sm text-fog/70">No activity yet — submit a protection request.</p>
+                )}
+                {activity.map((ev) => (
+                  <div key={ev.id} className="flex gap-3">
+                    <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white/[0.03] text-aegis">
+                      {ev.kind === "wallet" ? (
+                        <Wallet className="h-3.5 w-3.5" />
+                      ) : ev.kind === "backup" ? (
+                        <Database className="h-3.5 w-3.5" />
+                      ) : (
+                        <Activity className="h-3.5 w-3.5" />
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm leading-snug text-mist">{ev.message}</p>
+                      <p className="mt-1 text-[10px] uppercase tracking-wider text-fog/60">{fmtDate(ev.createdAt)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.section>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ConnectWalletModal open={connectOpen} onClose={() => setConnectOpen(false)} />
       <BackupModal open={backupOpen} onClose={() => setBackupOpen(false)} />
