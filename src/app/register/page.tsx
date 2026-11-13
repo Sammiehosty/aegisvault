@@ -11,8 +11,8 @@ export default async function RegisterPage() {
 
   return (
     <AuthShell
-      headline="Create your secure account."
-      sub="One account for wallet protection, backup verification and scam-awareness training. Under a minute to set up."
+      headline="Create your crypto safety account."
+      sub="One place to organise wallet review requests and learn to recognise wallet flashing, fake balances, phishing and other crypto scams."
     >
       <RegisterForm />
     </AuthShell>
