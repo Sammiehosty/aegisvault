@@ -136,7 +136,6 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
 
             <Field
               label="Public wallet address"
-              hint="The receiving address only — starts with 0x… (EVM), bc1…/1…/3… (Bitcoin) or a Solana base58 string."
             >
               <Textarea
                 value={address}
@@ -169,15 +168,6 @@ export function ConnectWalletModal({ open, onClose }: { open: boolean; onClose: 
                 )}
               </div>
             )}
-
-            <div className="flex items-start gap-3 rounded-2xl border border-amber-warn/25 bg-amber-warn/[0.06] px-4 py-3">
-              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-warn" />
-              <p className="text-xs leading-relaxed text-mist">
-                If you were about to paste 12 or 24 words — <span className="font-semibold text-white">stop</span>.
-                Those words control your funds. AegisVault never needs them, and our input fields are
-                intentionally designed for public addresses only.
-              </p>
-            </div>
 
             <Button
               className="w-full py-3"
