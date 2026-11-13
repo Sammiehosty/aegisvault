@@ -120,7 +120,13 @@ $data = body();
 
 try {
     if ($method === 'GET' && $path === '/health') {
-        $pdo->query('SELECT 1'); respond(200, ['ok'=>true,'service'=>'aegisvault-api']);
+        $missing = [];
+        foreach (['users', 'sessions'] as $table) {
+            try { $pdo->query("SELECT 1 FROM {$table} LIMIT 0"); }
+            catch (Throwable $e) { $missing[] = $table; }
+        }
+        if ($missing) respond(503, ['ok'=>false, 'service'=>'aegisvault-api', 'error'=>'Authentication database tables are missing: '.implode(', ', $missing)]);
+        respond(200, ['ok'=>true, 'service'=>'aegisvault-api', 'database'=>'connected', 'authentication_schema'=>'ready']);
     }
 
     // Explicitly report wrong HTTP methods for public authentication routes.
@@ -155,8 +161,7 @@ try {
         $q = $pdo->prepare("INSERT INTO users (id,full_name,email,password_hash,role,created_at) VALUES (?,?,?,?, 'user', UTC_TIMESTAMP())");
         $q->execute([$id, $name, $email, password_hash($password, PASSWORD_DEFAULT)]);
 
-        logEvent($pdo, $id, 'auth', 'Account created — welcome to AegisVault.');
-
+        // Activity logging is optional and must not block account creation.
         $token = bin2hex(random_bytes(32));
         $q = $pdo->prepare('INSERT INTO sessions (id,token_hash,user_id,expires_at,created_at) VALUES (?,?,?,?,UTC_TIMESTAMP())');
         $q->execute([uuid(), hash('sha256', $token), $id, gmdate('Y-m-d H:i:s', time() + 604800)]);
@@ -165,6 +170,13 @@ try {
         $q->execute([$id]);
         $createdUser = $q->fetch();
         $pdo->commit();
+
+        // Write the welcome event only after the account/session are committed.
+        try {
+            logEvent($pdo, $id, 'auth', 'Account created — welcome to AegisVault.');
+        } catch (Throwable $activityError) {
+            error_log('AegisVault signup activity log skipped: '.$activityError->getMessage());
+        }
 
         respond(201, ['ok'=>true, 'token'=>$token, 'user'=>publicUser($createdUser)]);
     }
