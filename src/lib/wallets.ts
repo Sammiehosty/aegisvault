@@ -31,11 +31,11 @@ const EVM_RE = /^0x[a-fA-F0-9]{40}$/;
 const BTC_RE = /^(1[a-km-zA-HJ-NP-Z1-9]{25,34}|3[a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{11,71})$/;
 const SOL_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
-export function detectChain(address: string): "EVM" | "Bitcoin" | "Solana" | null {
+export function detectChain(address: string): "EVM" | "Bitcoin" | "Solana" | "Other" | null {
   if (EVM_RE.test(address)) return "EVM";
   if (BTC_RE.test(address)) return "Bitcoin";
   if (SOL_RE.test(address)) return "Solana";
-  return null;
+  return address.trim().length > 0 ? "Other" : null;
 }
 
 export function isValidPublicAddress(address: string) {
