@@ -97,7 +97,6 @@ export function LoginForm() {
 
 export function RegisterForm() {
   const router = useRouter();
-  const appName = useAppName();
   const [pending, start] = useTransition();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
