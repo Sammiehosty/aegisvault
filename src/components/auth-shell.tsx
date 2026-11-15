@@ -74,7 +74,7 @@ export default function AuthShell({
               <ShieldCheck className="h-5 w-5 text-[#04120c]" strokeWidth={2.4} />
             </span>
             <span className="font-display text-lg font-bold tracking-tight text-white">
-              Aegis<span className="text-aegis">Vault</span>
+              {appName}
             </span>
           </Link>
           <h1 className="font-display text-2xl font-bold tracking-tight text-white sm:text-[28px]">
