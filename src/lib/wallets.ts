@@ -99,6 +99,6 @@ export const BACKUP_CHECKLIST = [
   {
     id: "never_typed",
     label: "Phrase has never been entered on any website",
-    hint: "AegisVault will never ask for it — not here, not anywhere",
+    hint: "We will never ask for it — not here, not anywhere",
   },
 ] as const;
