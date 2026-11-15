@@ -486,6 +486,7 @@ const NEVER = [
 ];
 
 function GoldenRules() {
+  const appName = useAppName();
   return (
     <section id="rules" className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8">
       <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-start">
@@ -667,6 +668,7 @@ function Cta() {
 /* ---------------------------------- footer --------------------------------- */
 
 function Footer() {
+  const appName = useAppName();
   return (
     <footer className="border-t border-line/60 bg-abyss/80">
       <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
