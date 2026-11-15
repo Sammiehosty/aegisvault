@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { apiRequest } from "@/lib/api";
 import { getCurrentUser, getSessionToken, type ApiUser } from "@/lib/auth";
 import AdminClient, { type ActivityRow, type BackupRow, type WalletRow } from "@/components/admin-client";
+import { getAppName } from "@/lib/site-settings";
 
-export const metadata = { title: "Admin console — AegisVault" };
+export async function generateMetadata() { return { title: `Admin console — ${await getAppName()}` }; }
 export const dynamic = "force-dynamic";
 
 type AdminPayload = {
