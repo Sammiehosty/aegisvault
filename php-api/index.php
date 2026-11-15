@@ -310,6 +310,13 @@ try {
         respond(200, ['ok'=>true, 'service'=>'aegisvault-api', 'database'=>'connected', 'authentication_schema'=>'ready']);
     }
 
+    if ($method === 'GET' && $path === '/settings') {
+        $q=$pdo->prepare("SELECT setting_value FROM app_settings WHERE setting_key='app_name' LIMIT 1");
+        $q->execute();
+        $row=$q->fetch(PDO::FETCH_ASSOC);
+        respond(200,['ok'=>true,'appName'=>($row && trim((string)$row['setting_value'])!=='') ? $row['setting_value'] : 'AegisVault']);
+    }
+
     // Explicitly report wrong HTTP methods for public authentication routes.
     // This prevents a GET request from falling through to the protected-route
     // guard and being incorrectly reported as an expired session.
