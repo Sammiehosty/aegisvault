@@ -34,6 +34,7 @@ import {
   XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useAppName } from "@/components/app-brand";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -60,6 +61,7 @@ function Reveal({
 }
 
 function Logo({ compact = false }: { compact?: boolean }) {
+  const appName = useAppName();
   return (
     <span className="inline-flex items-center gap-2.5">
       <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-aegis to-glow shadow-[0_8px_28px_-8px_rgba(23,232,160,0.6)]">
@@ -67,7 +69,7 @@ function Logo({ compact = false }: { compact?: boolean }) {
       </span>
       {!compact && (
         <span className="font-display text-lg font-bold tracking-tight text-white">
-          Aegis<span className="text-aegis">Vault</span>
+          {appName}
         </span>
       )}
     </span>
@@ -77,10 +79,11 @@ function Logo({ compact = false }: { compact?: boolean }) {
 /* ----------------------------------- nav ---------------------------------- */
 
 function Nav() {
+  const appName = useAppName();
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-ink/70 backdrop-blur-xl">
       <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-5 sm:px-8">
-        <Link href="/" aria-label="AegisVault home">
+        <Link href="/" aria-label={`${appName} home`}>
           <Logo />
         </Link>
         <nav className="hidden items-center gap-8 text-[13.5px] font-medium text-fog md:flex">
@@ -123,6 +126,7 @@ const MARQUEE_ITEMS = [
 ];
 
 function Hero() {
+  const appName = useAppName();
   return (
     <section className="relative overflow-hidden pt-[68px]">
       <div className="bg-grid absolute inset-0" />
@@ -160,7 +164,7 @@ function Hero() {
             transition={{ duration: 0.85, delay: 0.16, ease }}
             className="mt-6 max-w-xl text-[15.5px] leading-relaxed text-fog sm:text-base"
           >
-            AegisVault helps you recognise and reduce exposure to wallet flashing, fake token balances, phishing links, malicious approvals, address poisoning and recovery-phrase theft. Use practical safety guidance and request a System review of your public wallet address. 
+            {appName} helps you recognise and reduce exposure to wallet flashing, fake token balances, phishing links, malicious approvals, address poisoning and recovery-phrase theft. Use practical safety guidance and request a System review of your public wallet address. 
           </motion.p>
 
           <motion.div
@@ -213,7 +217,7 @@ function Hero() {
             <div className="relative overflow-hidden rounded-[20px]">
               <Image
                 src="/images/hero-vault.svg"
-                alt="AegisVault digital vault shield"
+                alt="Digital vault shield"
                 width={880}
                 height={880}
                 className="h-auto w-full object-cover"
@@ -339,7 +343,7 @@ const THREATS = [
   {
     icon: FileWarning,
     title: "Fake “wallet validation” sites",
-    body: "Cloned security portals claim your wallet must be “synchronized” or “validated” and ask for your 12/24-word recovery phrase. Never enter those words into a website or share them with support. AegisVault explains the warning signs and safe steps to take.",
+    body: "Cloned security portals claim your wallet must be “synchronized” or “validated” and ask for your 12/24-word recovery phrase. Never enter those words into a website or share them with support. The platform explains the warning signs and safe steps to take.",
   },
   {
     icon: Coins,
@@ -380,7 +384,7 @@ function Threats() {
             Know the scam before <span className="text-gradient">it knows you.</span>
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-fog">
-            Scams often begin with a convincing message, fake website, token display or approval request. Learn how common attacks work, what to check before signing or sending, and how AegisVault's public-address review process works.
+            Scams often begin with a convincing message, fake website, token display or approval request. Learn how common attacks work, what to check before signing or sending, and how the public-address review process works.
           </p>
         </div>
       </Reveal>
@@ -499,7 +503,7 @@ function GoldenRules() {
 
             <div className="mt-8 rounded-2xl border border-danger/25 bg-danger/[0.06] p-6">
               <p className="mb-4 flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-danger">
-                <ShieldX className="h-4 w-4" /> AegisVault will never ask for
+                <ShieldX className="h-4 w-4" /> {appName} will never ask for
               </p>
               <ul className="space-y-2.5">
                 {NEVER.map((n) => (
@@ -670,7 +674,7 @@ function Footer() {
           <div className="max-w-sm">
             <Logo />
             <p className="mt-4 text-[13px] leading-relaxed text-fog">
-              Crypto scam awareness and wallet security guidance, with a System-reviewed public-address request workflow. AegisVault does not hold your crypto or need your recovery phrase, private keys or wallet passwords.
+              Crypto scam awareness and wallet security guidance, with a System-reviewed public-address request workflow. {appName} does not hold your crypto or need your recovery phrase, private keys or wallet passwords.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-10 text-[13px] sm:grid-cols-3">
@@ -701,7 +705,7 @@ function Footer() {
           </div>
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-line/60 pt-6 text-xs text-fog/70 sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} AegisVault Security Labs. </p>
+          <p>© {new Date().getFullYear()} {appName}. </p>
           <p className="flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5 text-aegis" />
             If a anyone asks for your recovery phrase, it is a scam. Full stop.
