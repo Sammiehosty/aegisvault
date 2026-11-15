@@ -719,6 +719,7 @@ function Footer() {
 }
 
 export default function Landing() {
+  const appName = useAppName();
   return (
     <main className="relative">
       <Nav />
