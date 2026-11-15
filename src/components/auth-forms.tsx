@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAppName } from "@/components/app-brand";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
@@ -41,6 +42,7 @@ function PasswordField({ label, value, onChange, placeholder }: {
 
 export function LoginForm() {
   const router = useRouter();
+  const appName = useAppName();
   const [pending, start] = useTransition();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,7 +86,7 @@ export function LoginForm() {
       </Button>
 
       <p className="pt-2 text-center text-[13px] text-fog">
-        New to AegisVault?{" "}
+        New to {appName}?{" "}
         <Link href="/register" className="font-semibold text-aegis transition hover:text-[#3cf5b4]">
           Create your secured account
         </Link>
@@ -95,6 +97,7 @@ export function LoginForm() {
 
 export function RegisterForm() {
   const router = useRouter();
+  const appName = useAppName();
   const [pending, start] = useTransition();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
