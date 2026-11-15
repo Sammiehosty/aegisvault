@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAppName } from "@/components/app-brand";
 import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -63,6 +64,7 @@ export default function DashboardClient({
   score: number;
 }) {
   const router = useRouter();
+  const appName = useAppName();
   const [connectOpen, setConnectOpen] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -88,7 +90,7 @@ export default function DashboardClient({
               <ShieldCheck className="h-4.5 w-4.5 text-[#04120c]" strokeWidth={2.4} />
             </span>
             <span className="font-display text-base font-bold tracking-tight text-white">
-              Aegis<span className="text-aegis">Vault</span>
+              {appName}
             </span>
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -116,7 +118,7 @@ export default function DashboardClient({
                   {label:"Wallet protection",href:"#wallet-protection"},
                   {label:"Backup verification",href:"#backup-verification"},
                   {label:"Activity history",href:"#activity-history"},
-                  {label:"AegisVault home",href:"/"},
+                  {label:appName + " home",href:"/"},
                 ].map((item) => <a key={item.href} href={item.label === "Activity history" ? undefined : item.href}
                   onClick={(event) => {
                     setMenuOpen(false);
@@ -154,7 +156,7 @@ export default function DashboardClient({
             Stay Alert, {firstName}.
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-fog">
-            Use AegisVault's protection to spot wallet flashing, fake balances, phishing and malicious approvals, and learn how to verify payment claims before treating them as received. 
+            Use {appName}'s protection to spot wallet flashing, fake balances, phishing and malicious approvals, and learn how to verify payment claims before treating them as received. 
           </p>
         </motion.div>
 
