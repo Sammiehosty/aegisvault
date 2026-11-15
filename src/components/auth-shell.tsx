@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { EyeOff, Lock, ShieldCheck, UserCheck } from "lucide-react";
 import type { ReactNode } from "react";
+import { useAppName } from "@/components/app-brand";
 
 export default function AuthShell({
   headline,
@@ -12,6 +13,7 @@ export default function AuthShell({
   sub: string;
   children: ReactNode;
 }) {
+  const appName = useAppName();
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="bg-grid absolute inset-0" />
@@ -34,7 +36,7 @@ export default function AuthShell({
                 <ShieldCheck className="h-5 w-5 text-[#04120c]" strokeWidth={2.4} />
               </span>
               <span className="font-display text-lg font-bold tracking-tight text-white">
-                Aegis<span className="text-aegis">Vault</span>
+                {appName}
               </span>
             </Link>
           </div>
