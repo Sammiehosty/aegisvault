@@ -62,3 +62,10 @@ Run `database/migrations/2026_11_13_admin_management.sql` once in phpMyAdmin bef
 The admin console now supports deleting regular user accounts (their wallet requests, backup requests, sessions and activity are removed through the database foreign-key cascades), deleting wallet/backup requests in any status, changing the displayed application name, and changing the admin password. Password changes require the current password and revoke all active sessions, so sign in again afterward.
 
 Telegram request notifications include a **Delete request** button. It deletes the matching wallet or backup request even if it has already been approved or rejected. The Telegram callback remains restricted to the configured Telegram account and configured AegisVault administrator.
+
+
+## Dynamic application branding
+
+The public `GET /settings` endpoint returns the saved `app_name` value from the `app_settings` table. The Next.js application reads this value for the site header, landing page, login/register screens, user dashboard, admin dashboard and browser page titles. When an administrator saves a new name in Admin → Settings, refreshing the application loads the updated name throughout the site.
+
+Ensure the `2026_11_13_admin_management.sql` migration has been run and upload the latest `php-api/index.php` after updating the API.
