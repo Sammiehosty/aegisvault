@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import AuthShell from "@/components/auth-shell";
 import { LoginForm } from "@/components/auth-forms";
 import { getCurrentUser } from "@/lib/auth";
+import { getAppName } from "@/lib/site-settings";
 
-export const metadata = { title: "Sign in — AegisVault" };
+export async function generateMetadata() { return { title: `Sign in — ${await getAppName()}` }; }
+export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
   const user = await getCurrentUser();
