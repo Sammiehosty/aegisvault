@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { apiRequest } from "@/lib/api";
 import { getCurrentUser, getSessionToken } from "@/lib/auth";
 import DashboardClient from "@/components/dashboard-client";
+import { getAppName } from "@/lib/site-settings";
 
-export const metadata = { title: "Dashboard — AegisVault" };
+export async function generateMetadata() { return { title: `Dashboard — ${await getAppName()}` }; }
 export const dynamic = "force-dynamic";
 
 type DashboardPayload = {
